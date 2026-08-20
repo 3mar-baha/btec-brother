@@ -202,18 +202,18 @@ export default function LoginPage() {
         <Image
           src="/logo-light.png"
           alt="BTEC Hub"
-          width={66}
-          height={72}
+          width={958}
+          height={212}
           priority
-          className="dark:hidden"
+          className="h-16 w-auto object-contain dark:hidden"
         />
         <Image
           src="/logo-dark.png"
           alt="BTEC Hub"
-          width={59}
-          height={72}
+          width={958}
+          height={212}
           priority
-          className="hidden dark:block"
+          className="hidden h-16 w-auto object-contain dark:block"
         />
         <p className="text-center text-sm text-muted-foreground">
           منصة إدارة مهام BTEC الداخلية

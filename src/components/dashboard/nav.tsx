@@ -95,18 +95,18 @@ export function DashboardNav({ user }: { user: NavUser }) {
           <Image
             src="/logo-light.png"
             alt="BTEC Hub"
-            width={37}
-            height={40}
+            width={958}
+            height={212}
             priority
-            className="h-10 w-auto dark:hidden"
+            className="h-10 w-auto object-contain dark:hidden"
           />
           <Image
             src="/logo-dark.png"
             alt="BTEC Hub"
-            width={33}
-            height={40}
+            width={958}
+            height={212}
             priority
-            className="hidden h-10 w-auto dark:block"
+            className="hidden h-10 w-auto object-contain dark:block"
           />
         </Link>
 
