@@ -7,8 +7,9 @@ import { ClipboardCheck, FolderOpen } from "lucide-react";
 import type { Classification, CriteriaLevel } from "@/components/market/types";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { formatMoney } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
-import { notifyTelegram } from "@/lib/telegram";
+import { notifyTelegramUser } from "@/lib/telegram";
 import { BrokerOrderCard } from "./broker-order-card";
 import { RequestRevisionModal } from "./request-revision-modal";
 import type { DailyUpdate, WorkerProfile, WorkspaceOrder } from "./types";
@@ -90,10 +91,21 @@ export function BrokerWorkspace({
       title: "تم الاعتماد",
       description: data?.message ?? "تم اعتماد المهمة واكتمالها",
     });
-    const orderNumber = orders.find((o) => o.id === orderId)?.order_number;
-    if (orderNumber) {
-      notifyTelegram(
-        `🎉 تم اعتماد واكتمال الطلب #${orderNumber} وتوزيع الأرباح (80% / 20%)`
+    const completedOrder = orders.find((o) => o.id === orderId);
+    if (completedOrder) {
+      if (completedOrder.worker_id) {
+        notifyTelegramUser(
+          completedOrder.worker_id,
+          `🎉 تم اعتماد الطلب #${completedOrder.order_number} وإيداع نصيبك: ${formatMoney(
+            completedOrder.worker_share
+          )} د.أ`
+        );
+      }
+      notifyTelegramUser(
+        completedOrder.broker_id,
+        `🎉 تم اعتماد الطلب #${completedOrder.order_number} وإيداع عمولتك: ${formatMoney(
+          completedOrder.broker_share
+        )} د.أ`
       );
     }
     router.refresh();

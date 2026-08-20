@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatMoney } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
-import { escapeHtml, notifyTelegram } from "@/lib/telegram";
+import { notifyTelegramUser } from "@/lib/telegram";
 import { useToast } from "@/hooks/use-toast";
 import type { LedgerRow } from "./types";
 
@@ -57,10 +57,11 @@ export function SettleModal({
       title: "تمت التسوية",
       description: data?.message ?? "تم تسوية المستحقات المالية",
     });
-    notifyTelegram(
-      `💳 قام المدير بتسوية وتحويل مستحقات ${escapeHtml(
-        member.full_name
-      )}: ${formatMoney(data?.settled_amount ?? member.pendingBalance)} د.أ`
+    notifyTelegramUser(
+      member.id,
+      `💳 قام المدير بتسوية وتحويل مستحقاتك: ${formatMoney(
+        data?.settled_amount ?? member.pendingBalance
+      )} د.أ`
     );
     setNote("");
     onSettled();

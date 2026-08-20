@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TelegramLoginButton } from "@/components/telegram-login-button";
 import {
   Select,
   SelectContent,
@@ -68,6 +69,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
 
   const [signup, setSignup] = useState(EMPTY_SIGNUP);
   const [signupLoading, setSignupLoading] = useState(false);
@@ -218,7 +220,30 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="flex rounded-full bg-bone p-1">
+      <div className="flex flex-col gap-3">
+        <TelegramLoginButton />
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          أو
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full text-muted-foreground hover:text-ink"
+          onClick={() => setShowEmail((v) => !v)}
+        >
+          {showEmail
+            ? "إخفاء تسجيل الدخول بالبريد"
+            : "تسجيل الدخول بالبريد الإلكتروني"}
+        </Button>
+      </div>
+
+      {showEmail && (
+        <>
+          <div className="flex rounded-full bg-bone p-1">
         <button
           type="button"
           onClick={() => setMode("signin")}
@@ -356,6 +381,8 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+      )}
+        </>
       )}
     </div>
   );

@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
-import { escapeHtml, notifyTelegram } from "@/lib/telegram";
+import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import type { WorkspaceOrder } from "./types";
 
 interface RequestRevisionModalProps {
@@ -68,9 +68,12 @@ export function RequestRevisionModal({
       title: "تم طلب التعديل",
       description: data?.message ?? "تم إرسال الملاحظات إلى العامل",
     });
-    notifyTelegram(
-      `⚠️ طلب تعديل على الطلب #${order.order_number}: ${escapeHtml(trimmed)}`
-    );
+    if (order.worker_id) {
+      notifyTelegramUser(
+        order.worker_id,
+        `⚠️ طلب تعديل على الطلب #${order.order_number}: ${escapeHtml(trimmed)}`
+      );
+    }
     setNotes("");
     onRequested();
   }

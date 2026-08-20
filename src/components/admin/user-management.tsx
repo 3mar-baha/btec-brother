@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
+import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import type { ManagedUser } from "./types";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -76,6 +77,10 @@ export function UserManagement({ users }: UserManagementProps) {
       return;
     }
     toast({ title: "تم اعتماد المستخدم" });
+    notifyTelegramUser(
+      user.id,
+      `مرحباً ${escapeHtml(user.full_name)}! تم اعتماد حسابك في منصة BTEC Hub 🎉`
+    );
     router.refresh();
   }
 

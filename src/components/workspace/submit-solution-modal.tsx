@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
-import { escapeHtml, notifyTelegram } from "@/lib/telegram";
+import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import type { WorkspaceOrder } from "./types";
 
 interface SubmitSolutionModalProps {
@@ -76,7 +76,8 @@ export function SubmitSolutionModal({
       title: "تم التسليم",
       description: data?.message ?? "تم تسليم الحل بنجاح",
     });
-    notifyTelegram(
+    notifyTelegramUser(
+      order.broker_id,
       `📬 تم تسليم حل الطلب #${order.order_number} بواسطة ${escapeHtml(
         userName
       )} وجاري المراجعة`

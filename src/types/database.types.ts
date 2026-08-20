@@ -30,6 +30,8 @@ export type Database = {
           is_active: boolean;
           is_approved: boolean;
           requested_role: Database["public"]["Enums"]["user_role"];
+          telegram_chat_id: number | null;
+          telegram_username: string | null;
           created_at: string;
         };
         Insert: {
@@ -42,6 +44,8 @@ export type Database = {
           is_active?: boolean;
           is_approved?: boolean;
           requested_role?: Database["public"]["Enums"]["user_role"];
+          telegram_chat_id?: number | null;
+          telegram_username?: string | null;
           created_at?: string;
         };
         Update: {
@@ -54,6 +58,8 @@ export type Database = {
           is_active?: boolean;
           is_approved?: boolean;
           requested_role?: Database["public"]["Enums"]["user_role"];
+          telegram_chat_id?: number | null;
+          telegram_username?: string | null;
           created_at?: string;
         };
         Relationships: [];

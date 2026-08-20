@@ -6,7 +6,7 @@ import { Plus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
-import { escapeHtml, notifyTelegram } from "@/lib/telegram";
+import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import { CreateOrderModal } from "./create-order-modal";
 import { FilterBar } from "./filter-bar";
 import { OrderCard } from "./order-card";
@@ -19,7 +19,7 @@ import type {
 } from "./types";
 
 const ORDER_COLUMNS =
-  "id, order_number, title, unit_title, assignment_name, specialisation_id, grade_id, criteria_id, total_price, worker_share, deadline, status, created_at";
+  "id, order_number, broker_id, title, unit_title, assignment_name, specialisation_id, grade_id, criteria_id, total_price, worker_share, deadline, status, created_at";
 
 const DEFAULT_FILTERS: MarketFilters = {
   specialisationId: "all",
@@ -148,9 +148,12 @@ export function MarketClient({
       title: "تم الحجز",
       description: data?.message ?? "تم حجز المهمة بنجاح",
     });
-    const orderNumber = orders.find((o) => o.id === orderId)?.order_number;
-    if (orderNumber) {
-      notifyTelegram(`⚡ قام ${escapeHtml(userName)} بحجز الطلب #${orderNumber}`);
+    const claimedOrder = orders.find((o) => o.id === orderId);
+    if (claimedOrder) {
+      notifyTelegramUser(
+        claimedOrder.broker_id,
+        `⚡ قام ${escapeHtml(userName)} بحجز طلبك #${claimedOrder.order_number}`
+      );
     }
     setHasActiveTask(true);
     await loadOrders();

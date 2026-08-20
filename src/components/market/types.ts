@@ -1,6 +1,7 @@
 export interface MarketOrder {
   id: string;
   order_number: number;
+  broker_id: string;
   title: string;
   unit_title: string;
   assignment_name: string;
