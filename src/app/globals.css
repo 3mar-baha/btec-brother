@@ -2,26 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 40 33% 96%;
+    --foreground: 0 0% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+    --primary: 9 97% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 44 31% 93%;
+    --secondary-foreground: 0 0% 13%;
+    --muted: 44 31% 93%;
+    --muted-foreground: 0 0% 34%;
+    --accent: 44 31% 93%;
+    --accent-foreground: 0 0% 13%;
+    --destructive: 10 100% 38%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 13%;
+    --input: 0 0% 13%;
+    --ring: 0 0% 13%;
+
+    --canvas: 40 33% 96%;
+    --bone: 44 31% 93%;
+    --surface-card: 0 0% 100%;
+    --surface-dark: 0 0% 13%;
+    --surface-deep: 0 0% 0%;
+    --ink: 0 0% 13%;
+    --body: 0 0% 23%;
+    --charcoal: 0 0% 34%;
+    --ash: 0 0% 39%;
+    --ash-light: 0 0% 55%;
+    --brand: 9 97% 47%;
+    --brand-pressed: 10 100% 38%;
+    --success: 152 56% 39%;
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 99%;
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 99%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 99%;
+    --primary: 9 97% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 99%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 99%;
+    --destructive: 10 100% 38%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 99%;
+    --input: 0 0% 99%;
+    --ring: 0 0% 99%;
+
+    --canvas: 0 0% 7%;
+    --bone: 0 0% 13%;
+    --surface-card: 0 0% 13%;
+    --surface-dark: 0 0% 13%;
+    --surface-deep: 0 0% 0%;
+    --ink: 0 0% 99%;
+    --body: 0 0% 83%;
+    --charcoal: 0 0% 63%;
+    --ash: 0 0% 63%;
+    --ash-light: 0 0% 55%;
+    --brand: 9 97% 47%;
+    --brand-pressed: 10 100% 38%;
+    --success: 152 56% 39%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .font-tight {
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .hairline {
+    border-color: hsl(var(--border) / 0.12);
   }
 }
