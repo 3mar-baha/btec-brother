@@ -64,6 +64,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      telegram_link_tokens: {
+        Row: {
+          token: string;
+          user_id: string;
+          created_at: string;
+          expires_at: string;
+        };
+        Insert: {
+          token: string;
+          user_id: string;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Update: {
+          token?: string;
+          user_id?: string;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Relationships: [];
+      };
       specialisations: {
         Row: {
           id: number;

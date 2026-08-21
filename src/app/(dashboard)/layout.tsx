@@ -1,30 +1,27 @@
 import { redirect } from "next/navigation";
 
 import { DashboardNav, type NavUser } from "@/components/dashboard/nav";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  getCurrentProfile,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
-  const [profileRes, payoutsRes] = await Promise.all([
-    supabase
-      .from("users")
-      .select("role, full_name, avatar_url")
-      .eq("id", user.id)
-      .single(),
+  const supabase = await createClient();
+
+  const [profile, payoutsRes] = await Promise.all([
+    getCurrentProfile(user.id),
     supabase.from("payouts").select("amount, status").eq("user_id", user.id),
   ]);
-
-  const profile = profileRes.data;
   const role = (profile?.role ?? "worker") as NavUser["role"];
   const balance = (payoutsRes.data ?? [])
     .filter((p) => p.status === "settled")

@@ -10,11 +10,17 @@ const BOT_ID = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? "";
 
 /**
  * Telegram Login Widget + a custom-styled fallback button. The official widget
- * (loaded dynamically) renders its own button and redirects to
- * `/api/auth/telegram` after auth; if the script is blocked, the fallback
- * button drives the same OAuth flow via oauth.telegram.org directly.
+ * (loaded dynamically) renders its own button and redirects to `authUrl` after
+ * auth; if the script is blocked, the fallback button drives the same OAuth
+ * flow via oauth.telegram.org directly.
  */
-export function TelegramLoginButton() {
+export function TelegramLoginButton({
+  authUrl = "/api/auth/telegram",
+  label = "تسجيل الدخول عبر Telegram",
+}: {
+  authUrl?: string;
+  label?: string;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widgetError, setWidgetError] = useState(false);
 
@@ -37,16 +43,16 @@ export function TelegramLoginButton() {
     script.setAttribute("data-size", "large");
     script.setAttribute("data-userpic", "false");
     script.setAttribute("data-radius", "8");
-    script.setAttribute("data-auth-url", "/api/auth/telegram");
+    script.setAttribute("data-auth-url", authUrl);
     script.setAttribute("data-request-access", "write");
     script.onerror = () => setWidgetError(true);
 
     container.appendChild(script);
-  }, []);
+  }, [authUrl]);
 
   function manualLogin() {
     const origin = window.location.origin;
-    const returnTo = `${origin}/api/auth/telegram`;
+    const returnTo = `${origin}${authUrl}`;
     const url =
       `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(BOT_ID)}` +
       `&origin=${encodeURIComponent(origin)}` +
@@ -66,7 +72,7 @@ export function TelegramLoginButton() {
           className="w-full gap-2 border-[#54A9EB]/40 text-[#2481cc] hover:bg-[#54A9EB]/10"
         >
           <Send className="h-4 w-4" />
-          تسجيل الدخول عبر Telegram
+          {label}
         </Button>
       )}
     </div>

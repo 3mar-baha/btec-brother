@@ -57,6 +57,17 @@ export async function sendGroupNotification(
 }
 
 /**
+ * Server-side: send an HTML-parsed message to an arbitrary chat id (a private
+ * user id or a group id). Used by the bot webhook to reply directly.
+ */
+export async function sendTelegramMessage(
+  chatId: string | number,
+  message: string
+): Promise<boolean> {
+  return sendRawMessage(String(chatId), message);
+}
+
+/**
  * Server-side: send a private DM to a user. Looks up their Telegram chat id
  * from `public.users` and no-ops (returns false) when they haven't linked one.
  */

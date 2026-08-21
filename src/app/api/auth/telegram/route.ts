@@ -54,8 +54,23 @@ export async function GET(request: NextRequest) {
   const signIn = await supabase.auth.signInWithPassword({ email, password });
 
   if (signIn.error) {
-    // First login for this Telegram account: provision it via the service role.
     const service = createServiceClient();
+
+    // If this Telegram identity is already linked to an email account, do not
+    // provision a duplicate tg_* account — send the user to email sign-in.
+    const { data: linkedUser } = await service
+      .from("users")
+      .select("id")
+      .eq("telegram_chat_id", Number(id))
+      .maybeSingle();
+
+    if (linkedUser) {
+      const url = new URL("/login", request.url);
+      url.searchParams.set("error", "linked");
+      return NextResponse.redirect(url);
+    }
+
+    // First login for this Telegram account: provision it via the service role.
     const { error: createError } = await service.auth.admin.createUser({
       email,
       password,

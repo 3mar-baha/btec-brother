@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -73,6 +73,19 @@ export default function LoginPage() {
 
   const [signup, setSignup] = useState(EMPTY_SIGNUP);
   const [signupLoading, setSignupLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (error === "linked") {
+      setAuthError(
+        "حساب Telegram هذا مربوط بالفعل بحساب بريد إلكتروني. يرجى تسجيل الدخول بالبريد الإلكتروني."
+      );
+    } else if (error === "telegram") {
+      setAuthError("تعذر تسجيل الدخول عبر Telegram. حاول مرة أخرى.");
+    }
+  }, []);
 
   function setSignupField<K extends keyof typeof EMPTY_SIGNUP>(
     field: K,
@@ -219,6 +232,12 @@ export default function LoginPage() {
           منصة إدارة مهام BTEC الداخلية
         </p>
       </div>
+
+      {authError && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-relaxed text-destructive">
+          {authError}
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         <TelegramLoginButton />

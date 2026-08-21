@@ -12,7 +12,11 @@ import type {
   WorkerProfile,
   WorkspaceOrder,
 } from "@/components/workspace/types";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  getCurrentProfile,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -21,17 +25,11 @@ const ORDER_COLUMNS =
 
 export default async function WorkspacePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
+  const profile = await getCurrentProfile(user.id);
 
   const role = (profile?.role ?? "worker") as Role;
   const userName = profile?.full_name ?? "";

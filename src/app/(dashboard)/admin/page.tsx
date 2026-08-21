@@ -9,7 +9,11 @@ import type {
   StuckOrder,
   TransactionRow,
 } from "@/components/admin/types";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  getCurrentProfile,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -59,17 +63,11 @@ export default async function AdminPage({
   searchParams?: { tab?: string };
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const profile = await getCurrentProfile(user.id);
 
   if (profile?.role !== "admin") redirect("/market");
 

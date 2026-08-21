@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Settings,
   ShieldCheck,
   ShoppingBag,
   Users,
@@ -200,6 +201,12 @@ export function DashboardNav({ user }: { user: NavUser }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/market">سوق الطلبات</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <Settings className="h-4 w-4" />
+                  إعدادات الحساب
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

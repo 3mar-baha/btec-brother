@@ -7,7 +7,11 @@ import type {
   MarketOrder,
   Role,
 } from "@/components/market/types";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  getCurrentProfile,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +20,13 @@ const ORDER_COLUMNS =
 
 export default async function MarketPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
-  const [profileRes, ordersRes, specsRes, gradesRes, criteriaRes, activeRes] =
+  const [profile, ordersRes, specsRes, gradesRes, criteriaRes, activeRes] =
     await Promise.all([
-      supabase.from("users").select("role, full_name").eq("id", user.id).single(),
+      getCurrentProfile(user.id),
       supabase
         .from("orders")
         .select(ORDER_COLUMNS)
@@ -41,8 +43,8 @@ export default async function MarketPage() {
         .limit(1),
     ]);
 
-  const role = (profileRes.data?.role ?? "worker") as Role;
-  const userName = profileRes.data?.full_name ?? "";
+  const role = (profile?.role ?? "worker") as Role;
+  const userName = profile?.full_name ?? "";
   const hasActiveTask = (activeRes.data ?? []).length > 0;
 
   return (

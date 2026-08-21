@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { LogsClient } from "@/components/logs/logs-client";
 import type { ActivityLog, LogOrder, LogUser } from "@/components/logs/types";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +10,7 @@ const LOG_COLUMNS = "id, order_id, actor_id, action, details, created_at";
 
 export default async function LogsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
