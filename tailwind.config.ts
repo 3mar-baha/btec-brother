@@ -68,8 +68,8 @@ const config = {
         "2xl": "1rem",
       },
       fontFamily: {
-        sans: ["var(--font-body)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "var(--font-body)", "sans-serif"],
+        sans: ["var(--font-arabic)", "system-ui", "sans-serif"],
+        display: ["var(--font-arabic)", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       keyframes: {
