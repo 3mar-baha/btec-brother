@@ -13,7 +13,6 @@ import {
   ShoppingBag,
   User,
   Users,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatMoney } from "@/lib/format";
+import { HeaderBalance } from "@/components/dashboard/header-balance";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -35,6 +34,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export type Role = "admin" | "broker" | "worker";
 
 export interface NavUser {
+  id: string;
   fullName: string;
   email: string;
   avatarUrl: string | null;
@@ -134,10 +134,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
 
         {/* User controls */}
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 font-mono text-sm font-bold text-ink sm:flex dark:bg-surface-dark">
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-            <span>{formatMoney(user.balance)} د.أ</span>
-          </div>
+          <HeaderBalance userId={user.id} initialBalance={user.balance} />
 
           {user.role === "admin" && (
             <Link

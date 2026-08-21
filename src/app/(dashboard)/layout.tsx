@@ -41,6 +41,7 @@ export default async function DashboardLayout({
   }
 
   const navUser: NavUser = {
+    id: user.id,
     fullName: profile?.full_name ?? user.email ?? "",
     email: user.email ?? "",
     avatarUrl: profile?.avatar_url ?? null,
