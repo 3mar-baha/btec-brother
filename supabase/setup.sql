@@ -1,4 +1,20 @@
 -- ============================================================================
+-- BTEC Hub — CONSOLIDATED SETUP (fresh database)
+-- ----------------------------------------------------------------------------
+-- Run this single file in the Supabase SQL editor for a brand-new project.
+-- It applies, in order:
+--   1. schema.sql            (tables, functions, RLS, storage)
+--   2. add_telegram_auth.sql (telegram identity columns on users)
+--   3. telegram_bot_linking.sql
+--   4. grant_service_role_and_promote_admin.sql
+--   5. seed.sql              (specialisations, grade_levels, criteria_levels)
+-- ============================================================================
+
+
+-- ============================================================================
+-- 1. schema.sql
+-- ============================================================================
+-- ============================================================================
 -- BTEC Hub — Database Schema & Policies
 -- ----------------------------------------------------------------------------
 -- `users` and `orders` follow docs/05-DATA-MODEL.md exactly. The remaining
@@ -970,3 +986,427 @@ grant execute on function public.reject_user(uuid) to authenticated, service_rol
 -- ---------------------------------------------------------------------------
 -- Seed data lives in seed.sql (classification reference data + team accounts).
 -- ---------------------------------------------------------------------------
+
+
+-- ============================================================================
+-- 2. add_telegram_auth.sql
+-- ============================================================================
+-- ============================================================================
+-- BTEC Hub — Incremental Migration: Telegram Auth & Notifications
+-- ----------------------------------------------------------------------------
+-- Run directly in the live Supabase SQL editor. Adds Telegram identity columns
+-- to `public.users`, updates `handle_new_user` to capture them from auth
+-- metadata, and extends `enforce_user_field_protection` to cover them.
+-- Assumes the base schema (users table, user_role enum, is_admin(), and the
+-- approval-workflow columns/RPCs from update_approval_workflow.sql) already
+-- exist.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- 1. Column additions (idempotent)
+-- ---------------------------------------------------------------------------
+alter table public.users add column if not exists telegram_chat_id bigint;
+alter table public.users add column if not exists telegram_username text;
+
+-- ---------------------------------------------------------------------------
+-- 2. Updated handle_new_user trigger
+-- Captures telegram_chat_id / telegram_username from raw_user_meta_data so
+-- Telegram OAuth sign-ups populate them automatically.
+-- ---------------------------------------------------------------------------
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_requested_role public.user_role;
+  v_telegram_chat_id bigint;
+begin
+  v_requested_role := case
+    when new.raw_user_meta_data ->> 'requested_role' = 'broker' then 'broker'::public.user_role
+    else 'worker'::public.user_role
+  end;
+
+  v_telegram_chat_id := nullif(new.raw_user_meta_data ->> 'telegram_chat_id', '')::bigint;
+
+  insert into public.users (
+    id, email, full_name, role, phone_number, is_approved, requested_role,
+    telegram_chat_id, telegram_username
+  )
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'full_name', new.email),
+    case when new.email = 'admin@btechub.app' then 'admin'::public.user_role else 'worker'::public.user_role end,
+    nullif(new.raw_user_meta_data ->> 'phone_number', ''),
+    (new.email = 'admin@btechub.app'),
+    v_requested_role,
+    v_telegram_chat_id,
+    nullif(new.raw_user_meta_data ->> 'telegram_username', '')
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+-- ---------------------------------------------------------------------------
+-- 3. Updated field-protection trigger
+-- Extends the non-admin write guard to also cover the Telegram identity
+-- columns (only the service role / auth flow may mutate them).
+-- ---------------------------------------------------------------------------
+create or replace function public.enforce_user_field_protection()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    return new;
+  end if;
+
+  if not public.is_admin() then
+    if new.role is distinct from old.role
+       or new.is_approved is distinct from old.is_approved
+       or new.requested_role is distinct from old.requested_role
+       or new.is_active is distinct from old.is_active
+       or new.telegram_chat_id is distinct from old.telegram_chat_id
+       or new.telegram_username is distinct from old.telegram_username
+    then
+      raise exception 'لا تملك صلاحية تعديل بيانات الحساب' using errcode = 'P0001';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_user_fields on public.users;
+create trigger protect_user_fields
+before update on public.users
+for each row execute function public.enforce_user_field_protection();
+
+
+-- ============================================================================
+-- 3. telegram_bot_linking.sql
+-- ============================================================================
+-- ============================================================================
+-- BTEC Hub — Migration: Telegram bot deep-link linking
+-- ----------------------------------------------------------------------------
+-- Run directly in the live Supabase SQL editor. Enables "link your Telegram
+-- account" via the bot (t.me/btechub_team_bot?start=<token>) instead of the
+-- OAuth login widget. The settings page inserts a one-time token; the bot
+-- webhook resolves it to a chat_id and stores that on public.users.
+--
+-- Self-contained: re-applies the service_role table grants (idempotent) so it
+-- works even if grant_service_role_and_promote_admin.sql was not run yet.
+-- ============================================================================
+
+-- 1. Baseline role grants (idempotent; RLS remains the security boundary).
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all functions in schema public to anon, authenticated, service_role;
+
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+
+-- 2. One-time link tokens. Only the service role (settings page + webhook)
+--    reads/writes this table; RLS denies authenticated/anon.
+create table if not exists public.telegram_link_tokens (
+  token      text primary key,
+  user_id    uuid not null references public.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '10 minutes')
+);
+
+alter table public.telegram_link_tokens enable row level security;
+
+grant all on public.telegram_link_tokens to service_role;
+
+
+-- ============================================================================
+-- 4. grant_service_role_and_promote_admin.sql
+-- ============================================================================
+-- ============================================================================
+-- BTEC Hub — Migration: service_role grants + admin promotion
+-- ----------------------------------------------------------------------------
+-- Run directly in the live Supabase SQL editor. Fixes two things:
+--
+-- 1. The `service_role` role is missing table-level privileges (it only had
+--    function EXECUTE grants), so service-role writes to public.users fail
+--    with "permission denied for table users". This blocks Telegram link/unlink
+--    and the smart-login duplicate check.
+--
+-- 2. Promotes omarbaha224@gmail.com to admin (role, is_approved, is_active)
+--    and makes the handle_new_user trigger auto-admin that address alongside
+--    admin@btechub.app.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- 1. Restore Supabase's default role grants on the public schema.
+--    RLS remains the security boundary; these grants only restore the baseline
+--    that Supabase normally applies so `authenticated`/`service_role` can reach
+--    the tables.
+-- ---------------------------------------------------------------------------
+grant usage on schema public to anon, authenticated, service_role;
+
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all functions in schema public to anon, authenticated, service_role;
+
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- 2. Promote the requested admin email.
+--    Handles both the case where a public.users row already exists and the
+--    case where the user signed up before the handle_new_user trigger existed.
+-- ---------------------------------------------------------------------------
+update public.users
+   set role        = 'admin',
+       is_approved = true,
+       is_active   = true
+ where email = 'omarbaha224@gmail.com';
+
+insert into public.users (id, email, full_name, role, is_approved, is_active, requested_role)
+select au.id,
+       au.email,
+       coalesce(au.raw_user_meta_data ->> 'full_name', au.email),
+       'admin',
+       true,
+       true,
+       'worker'
+from auth.users au
+where au.email = 'omarbaha224@gmail.com'
+on conflict (id) do update
+  set role        = 'admin',
+      is_approved = true,
+      is_active   = true;
+
+-- ---------------------------------------------------------------------------
+-- 3. Update handle_new_user to auto-admin omarbaha224@gmail.com (so any future
+--    re-registration keeps admin). Includes the Telegram identity columns from
+--    add_telegram_auth.sql.
+-- ---------------------------------------------------------------------------
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_requested_role public.user_role;
+  v_telegram_chat_id bigint;
+begin
+  v_requested_role := case
+    when new.raw_user_meta_data ->> 'requested_role' = 'broker' then 'broker'::public.user_role
+    else 'worker'::public.user_role
+  end;
+
+  v_telegram_chat_id := nullif(new.raw_user_meta_data ->> 'telegram_chat_id', '')::bigint;
+
+  insert into public.users (
+    id, email, full_name, role, phone_number, is_approved, requested_role,
+    telegram_chat_id, telegram_username
+  )
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'full_name', new.email),
+    case
+      when new.email in ('admin@btechub.app', 'omarbaha224@gmail.com') then 'admin'::public.user_role
+      else 'worker'::public.user_role
+    end,
+    nullif(new.raw_user_meta_data ->> 'phone_number', ''),
+    (new.email in ('admin@btechub.app', 'omarbaha224@gmail.com')),
+    v_requested_role,
+    v_telegram_chat_id,
+    nullif(new.raw_user_meta_data ->> 'telegram_username', '')
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+
+-- ============================================================================
+-- 5. seed.sql
+-- ============================================================================
+-- ============================================================================
+-- BTEC Hub — Seed Data
+-- ----------------------------------------------------------------------------
+-- Run AFTER schema.sql on a fresh database. The script is idempotent.
+--
+-- 1. Classification reference data (Specialisations, Grade Levels, Criteria).
+-- 2. Team accounts linked to Supabase Auth (1 Admin, 3 Brokers, 7 Workers).
+--
+-- Default password for all seeded accounts: Password123!
+-- (change it immediately in production)
+-- ============================================================================
+
+create extension if not exists pgcrypto;
+
+-- ---------------------------------------------------------------------------
+-- 1. Classification reference data
+-- ---------------------------------------------------------------------------
+insert into public.specialisations (name) values
+  ('إدارة الأعمال'),
+  ('تكنولوجيا المعلومات'),
+  ('الهندسة'),
+  ('الضيافة والسياحة')
+on conflict (name) do nothing;
+
+insert into public.grade_levels (name) values
+  ('الصف العاشر'),
+  ('الأول ثانوي'),
+  ('التوجيهي')
+on conflict (name) do nothing;
+
+insert into public.criteria_levels (code, name) values
+  ('P', 'مقبول'),
+  ('M', 'جيد'),
+  ('D', 'ممتاز')
+on conflict (code) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- 2. Team accounts (linked to Supabase Auth)
+-- ---------------------------------------------------------------------------
+-- Inserting into auth.users fires the `handle_new_user` trigger, which creates
+-- the matching public.users row (role defaults to 'worker', full_name taken
+-- from raw_user_meta_data). Roles are then corrected below.
+-- ---------------------------------------------------------------------------
+insert into auth.users (
+  id,
+  instance_id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  created_at,
+  updated_at
+) values
+  -- Admin
+  ('11111111-1111-4111-8111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'admin@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"أحمد المدير"}',
+   '', '', '', '', now(), now()),
+  -- Brokers
+  ('22222222-2222-4222-8222-222222222222', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'broker1@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"محمد الوسيط"}',
+   '', '', '', '', now(), now()),
+  ('33333333-3333-4333-8333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'broker2@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"خالد الوسيط"}',
+   '', '', '', '', now(), now()),
+  ('44444444-4444-4444-8444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'broker3@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"سارة الوسيط"}',
+   '', '', '', '', now(), now()),
+  -- Workers
+  ('55555555-5555-4555-8555-555555555555', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker1@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"يوسف العامل"}',
+   '', '', '', '', now(), now()),
+  ('66666666-6666-4666-8666-666666666666', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker2@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"عمر العامل"}',
+   '', '', '', '', now(), now()),
+  ('77777777-7777-4777-8777-777777777777', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker3@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"ليلى العاملة"}',
+   '', '', '', '', now(), now()),
+  ('88888888-8888-4888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker4@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"نور العاملة"}',
+   '', '', '', '', now(), now()),
+  ('99999999-9999-4999-8999-999999999999', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker5@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"عبدالله العامل"}',
+   '', '', '', '', now(), now()),
+  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker6@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"فاطمة العاملة"}',
+   '', '', '', '', now(), now()),
+  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+   'worker7@btechub.app', crypt('Password123!', gen_salt('bf', 10)), now(),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"زياد العامل"}',
+   '', '', '', '', now(), now())
+on conflict (id) do nothing;
+
+-- Email identities so password sign-in resolves correctly.
+insert into auth.identities (id, user_id, identity_data, provider, provider_id, created_at, updated_at, last_sign_in_at)
+values
+  ('11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111',
+   jsonb_build_object('sub', '11111111-1111-4111-8111-111111111111', 'email', 'admin@btechub.app'),
+   'email', '11111111-1111-4111-8111-111111111111', now(), now(), now()),
+  ('22222222-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222',
+   jsonb_build_object('sub', '22222222-2222-4222-8222-222222222222', 'email', 'broker1@btechub.app'),
+   'email', '22222222-2222-4222-8222-222222222222', now(), now(), now()),
+  ('33333333-3333-4333-8333-333333333333', '33333333-3333-4333-8333-333333333333',
+   jsonb_build_object('sub', '33333333-3333-4333-8333-333333333333', 'email', 'broker2@btechub.app'),
+   'email', '33333333-3333-4333-8333-333333333333', now(), now(), now()),
+  ('44444444-4444-4444-8444-444444444444', '44444444-4444-4444-8444-444444444444',
+   jsonb_build_object('sub', '44444444-4444-4444-8444-444444444444', 'email', 'broker3@btechub.app'),
+   'email', '44444444-4444-4444-8444-444444444444', now(), now(), now()),
+  ('55555555-5555-4555-8555-555555555555', '55555555-5555-4555-8555-555555555555',
+   jsonb_build_object('sub', '55555555-5555-4555-8555-555555555555', 'email', 'worker1@btechub.app'),
+   'email', '55555555-5555-4555-8555-555555555555', now(), now(), now()),
+  ('66666666-6666-4666-8666-666666666666', '66666666-6666-4666-8666-666666666666',
+   jsonb_build_object('sub', '66666666-6666-4666-8666-666666666666', 'email', 'worker2@btechub.app'),
+   'email', '66666666-6666-4666-8666-666666666666', now(), now(), now()),
+  ('77777777-7777-4777-8777-777777777777', '77777777-7777-4777-8777-777777777777',
+   jsonb_build_object('sub', '77777777-7777-4777-8777-777777777777', 'email', 'worker3@btechub.app'),
+   'email', '77777777-7777-4777-8777-777777777777', now(), now(), now()),
+  ('88888888-8888-4888-8888-888888888888', '88888888-8888-4888-8888-888888888888',
+   jsonb_build_object('sub', '88888888-8888-4888-8888-888888888888', 'email', 'worker4@btechub.app'),
+   'email', '88888888-8888-4888-8888-888888888888', now(), now(), now()),
+  ('99999999-9999-4999-8999-999999999999', '99999999-9999-4999-8999-999999999999',
+   jsonb_build_object('sub', '99999999-9999-4999-8999-999999999999', 'email', 'worker5@btechub.app'),
+   'email', '99999999-9999-4999-8999-999999999999', now(), now(), now()),
+  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+   jsonb_build_object('sub', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'email', 'worker6@btechub.app'),
+   'email', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', now(), now(), now()),
+  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+   jsonb_build_object('sub', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'email', 'worker7@btechub.app'),
+   'email', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', now(), now(), now())
+on conflict do nothing;
+
+-- Correct roles (the trigger defaults everyone to 'worker') and mark all
+-- seeded team accounts as pre-approved.
+update public.users set role = 'admin',  is_approved = true where id = '11111111-1111-4111-8111-111111111111';
+update public.users set role = 'broker', is_approved = true where id in (
+  '22222222-2222-4222-8222-222222222222',
+  '33333333-3333-4333-8333-333333333333',
+  '44444444-4444-4444-8444-444444444444'
+);
+update public.users set role = 'worker', is_approved = true where id in (
+  '55555555-5555-4555-8555-555555555555',
+  '66666666-6666-4666-8666-666666666666',
+  '77777777-7777-4777-8777-777777777777',
+  '88888888-8888-4888-8888-888888888888',
+  '99999999-9999-4999-8999-999999999999',
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+);
