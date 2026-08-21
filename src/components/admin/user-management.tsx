@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Lock, X } from "lucide-react";
+import { Check, Loader2, Lock, Pencil, X } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
@@ -59,6 +68,10 @@ export function UserManagement({ users }: UserManagementProps) {
   const [supabase] = useState(() => createClient());
   const [busyId, setBusyId] = useState<string | null>(null);
   const [roleChoices, setRoleChoices] = useState<Record<string, string>>({});
+  const [editUser, setEditUser] = useState<ManagedUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editRole, setEditRole] = useState<"admin" | "broker" | "worker">("worker");
 
   const pending = users.filter((u) => !u.is_approved && u.is_active);
 
@@ -128,6 +141,42 @@ export function UserManagement({ users }: UserManagementProps) {
       return;
     }
     toast({ title: "تم تحديث الحالة" });
+    router.refresh();
+  }
+
+  function openEdit(u: ManagedUser) {
+    setEditUser(u);
+    setEditName(u.full_name);
+    setEditPhone(u.phone_number ?? "");
+    setEditRole(u.role as "admin" | "broker" | "worker");
+  }
+
+  async function saveEdit() {
+    if (!editUser) return;
+    if (!editName.trim()) {
+      toast({ title: "الاسم مطلوب", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({
+        full_name: editName.trim(),
+        phone_number: editPhone.trim() || null,
+        role: editRole,
+      })
+      .eq("id", editUser.id);
+
+    if (error) {
+      toast({
+        title: "تعذر التحديث",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({ title: "تم تحديث بيانات العضو" });
+    setEditUser(null);
     router.refresh();
   }
 
@@ -240,6 +289,7 @@ export function UserManagement({ users }: UserManagementProps) {
                 <TableHead className="text-start">الاعتماد</TableHead>
                 <TableHead className="text-start">النشاط</TableHead>
                 <TableHead className="text-start">تاريخ التسجيل</TableHead>
+                <TableHead className="text-start">تعديل</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -311,12 +361,76 @@ export function UserManagement({ users }: UserManagementProps) {
                   <TableCell className="font-mono text-xs text-ash">
                     {formatDate(u.created_at)}
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label="تعديل"
+                      onClick={() => openEdit(u)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       </section>
+
+      <Dialog
+        open={!!editUser}
+        onOpenChange={(open) => {
+          if (!open) setEditUser(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تعديل بيانات العضو</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-name">الاسم الثلاثي</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-phone">رقم الهاتف</Label>
+              <Input
+                id="edit-phone"
+                dir="ltr"
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>الدور</Label>
+              <Select
+                value={editRole}
+                onValueChange={(v) => setEditRole(v as "admin" | "broker" | "worker")}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="worker">عامل</SelectItem>
+                  <SelectItem value="broker">وسيط</SelectItem>
+                  <SelectItem value="admin">مدير</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUser(null)}>
+              إلغاء
+            </Button>
+            <Button onClick={saveEdit}>حفظ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
