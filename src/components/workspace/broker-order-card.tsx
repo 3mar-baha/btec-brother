@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useEntrance } from "@/hooks/use-motion";
 import { criteriaBadgeClass } from "@/lib/criteria";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -50,9 +51,10 @@ export function BrokerOrderCard({
 }: BrokerOrderCardProps) {
   const code = criteria?.code ?? "";
   const isSubmitted = order.status === "submitted";
+  const cardRef = useEntrance<HTMLDivElement>();
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <Card ref={cardRef} className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {code && (

@@ -102,6 +102,7 @@ export function WorkerWorkspace({
 
       {activeTask ? (
         <ActiveTaskCard
+          key={activeTask.id}
           order={activeTask}
           specialisationName={specName(activeTask.specialisation_id)}
           gradeName={gradeName(activeTask.grade_id)}

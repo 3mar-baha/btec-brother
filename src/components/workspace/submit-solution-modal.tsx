@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSpringPress } from "@/hooks/use-motion";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
@@ -39,6 +40,8 @@ export function SubmitSolutionModal({
   const [plagiarism, setPlagiarism] = useState("");
   const [ai, setAi] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { ref: submitRef, ...submitHandlers } =
+    useSpringPress<HTMLButtonElement>();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -142,6 +145,8 @@ export function SubmitSolutionModal({
               إلغاء
             </Button>
             <Button
+              ref={submitRef}
+              {...submitHandlers}
               type="submit"
               disabled={submitting}
               className="bg-ink text-background shadow-none hover:opacity-90"

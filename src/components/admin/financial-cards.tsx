@@ -1,3 +1,4 @@
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { Card } from "@/components/ui/card";
 import { formatMoney } from "@/lib/format";
 import type { FinancialSummary } from "./types";
@@ -17,7 +18,7 @@ export function FinancialCards({ summary }: { summary: FinancialSummary }) {
         <Card key={c.label} className="p-4">
           <p className="text-xs text-ash">{c.label}</p>
           <p className="mt-2 font-mono text-xl font-semibold text-ink sm:text-2xl">
-            {formatMoney(c.value)} د.أ
+            <AnimatedNumber value={c.value} format={formatMoney} /> د.أ
           </p>
         </Card>
       ))}

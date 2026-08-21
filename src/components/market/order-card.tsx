@@ -11,6 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePulse, useSpringPress } from "@/hooks/use-motion";
 import { criteriaBadgeClass } from "@/lib/criteria";
 import { countdown, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,9 @@ export function OrderCard({
 
   const timer = countdown(order.deadline, now);
   const code = criteria?.code ?? "";
+  const urgentRef = usePulse<HTMLSpanElement>(timer.urgent);
+  const { ref: claimRef, ...claimHandlers } =
+    useSpringPress<HTMLButtonElement>();
 
   return (
     <Card className="flex flex-col gap-4 p-5">
@@ -61,6 +65,7 @@ export function OrderCard({
           </span>
         </div>
         <span
+          ref={urgentRef}
           className={cn(
             "flex items-center gap-1 font-mono text-xs",
             timer.overdue
@@ -106,6 +111,8 @@ export function OrderCard({
             <TooltipTrigger asChild>
               <span>
                 <Button
+                  ref={claimRef}
+                  {...claimHandlers}
                   size="sm"
                   disabled={disabled || claiming}
                   onClick={() => onClaim(order.id)}

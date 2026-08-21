@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useEntrance, usePulse, useSpringPress } from "@/hooks/use-motion";
 import { criteriaBadgeClass } from "@/lib/criteria";
 import { countdown, formatDate, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,10 @@ export function ActiveTaskCard({
 
   const timer = countdown(order.deadline, now);
   const code = criteria?.code ?? "";
+  const cardRef = useEntrance<HTMLDivElement>();
+  const urgentRef = usePulse<HTMLSpanElement>(timer.urgent);
+  const { ref: submitRef, ...submitHandlers } =
+    useSpringPress<HTMLButtonElement>();
 
   async function handleAddUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,7 +73,7 @@ export function ActiveTaskCard({
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card ref={cardRef} className="overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-canvas px-5 py-4">
         <div className="flex items-center gap-2">
           {code && (
@@ -87,6 +92,7 @@ export function ActiveTaskCard({
           </Badge>
         </div>
         <span
+          ref={urgentRef}
           className={cn(
             "flex items-center gap-1 font-mono text-xs",
             timer.overdue
@@ -217,6 +223,8 @@ export function ActiveTaskCard({
           اعتذار وتنازل
         </Button>
         <Button
+          ref={submitRef}
+          {...submitHandlers}
           className="bg-ink text-background shadow-none hover:opacity-90"
           onClick={onOpenSubmit}
         >

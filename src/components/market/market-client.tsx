@@ -5,6 +5,7 @@ import { Plus, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useStaggeredEntrance } from "@/hooks/use-motion";
 import { createClient } from "@/lib/supabase/client";
 import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import { CreateOrderModal } from "./create-order-modal";
@@ -160,6 +161,7 @@ export function MarketClient({
   }
 
   const isBroker = role === "broker";
+  const gridRef = useStaggeredEntrance<HTMLDivElement>([filtered]);
 
   return (
     <div className="space-y-6">
@@ -200,7 +202,10 @@ export function MarketClient({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+        >
           {filtered.map((order) => (
             <OrderCard
               key={order.id}
