@@ -19,7 +19,6 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,7 +75,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
 
   const items: NavItem[] =
     user.role === "admin"
-      ? [...NAV_ITEMS, { href: "/admin", label: "الإدارة", icon: ShieldCheck }]
+      ? [...NAV_ITEMS, { href: "/admin", label: "لوحة الإدارة", icon: ShieldCheck }]
       : NAV_ITEMS;
 
   async function handleSignOut() {
@@ -87,8 +86,9 @@ export function DashboardNav({ user }: { user: NavUser }) {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-canvas">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-card/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
         <Link href="/market" className="flex shrink-0 items-center">
           <Image
             src="/logo-light.png"
@@ -96,7 +96,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
             width={958}
             height={212}
             priority
-            className="h-8 w-auto object-contain dark:hidden"
+            className="h-9 w-auto object-contain dark:hidden"
           />
           <Image
             src="/logo-dark.png"
@@ -104,11 +104,12 @@ export function DashboardNav({ user }: { user: NavUser }) {
             width={958}
             height={212}
             priority
-            className="hidden h-8 w-auto object-contain dark:block"
+            className="hidden h-9 w-auto object-contain dark:block"
           />
         </Link>
 
-        <nav className="hidden items-center gap-1 sm:flex">
+        {/* Center navigation */}
+        <nav className="hidden items-center gap-1.5 rounded-full border border-border bg-bone/70 p-1.5 shadow-inner sm:flex dark:bg-card/90">
           {items.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -118,10 +119,10 @@ export function DashboardNav({ user }: { user: NavUser }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors",
+                  "flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all",
                   active
-                    ? "bg-ink text-background"
-                    : "text-muted-foreground hover:bg-bone hover:text-ink"
+                    ? "bg-ink font-semibold text-white shadow-sm dark:bg-primary dark:text-white"
+                    : "text-body hover:bg-bone/80 hover:text-ink dark:hover:bg-surface-dark"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -131,7 +132,13 @@ export function DashboardNav({ user }: { user: NavUser }) {
           })}
         </nav>
 
-        <div className="ms-auto flex items-center gap-3">
+        {/* User controls */}
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 font-mono text-sm font-bold text-ink sm:flex dark:bg-surface-dark">
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+            <span>{formatMoney(user.balance)} د.أ</span>
+          </div>
+
           {user.role === "admin" && (
             <Link
               href="/admin?tab=members"
@@ -146,25 +153,8 @@ export function DashboardNav({ user }: { user: NavUser }) {
               )}
             </Link>
           )}
-          <div className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm font-medium text-ink">
-              {formatMoney(user.balance)} د.أ
-            </span>
-          </div>
 
           <ThemeToggle />
-
-          <Button
-            asChild
-            size="sm"
-            className="hidden h-9 bg-brand px-4 text-white shadow-none hover:bg-brand-pressed sm:inline-flex"
-          >
-            <Link href="/market">
-              <ShoppingBag className="h-4 w-4" />
-              تصفح السوق
-            </Link>
-          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -178,20 +168,21 @@ export function DashboardNav({ user }: { user: NavUser }) {
                     {initials(user.fullName)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-start lg:block">
-                  <span className="block text-sm font-medium leading-tight text-ink">
-                    {user.fullName}
-                  </span>
-                  <Badge variant="secondary" className="mt-0.5 px-2 py-0 text-[10px]">
-                    {ROLE_LABELS[user.role]}
-                  </Badge>
-                </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel className="flex flex-col gap-1">
                 <span className="text-sm font-medium">{user.fullName}</span>
-                <Badge variant="secondary" className="w-fit px-2 py-0 text-[10px]">
+                <span
+                  className="text-xs font-normal text-muted-foreground"
+                  dir="ltr"
+                >
+                  {user.email}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="w-fit px-2 py-0 text-[10px]"
+                >
                   {ROLE_LABELS[user.role]}
                 </Badge>
               </DropdownMenuLabel>
@@ -199,7 +190,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
               <DropdownMenuItem asChild>
                 <Link href="/profile">
                   <User className="h-4 w-4" />
-                  ملفي الشخصي
+                  الملف الشخصي
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -218,7 +209,6 @@ export function DashboardNav({ user }: { user: NavUser }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </div>
     </header>

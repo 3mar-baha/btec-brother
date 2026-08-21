@@ -50,7 +50,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-canvas">
       <DashboardNav user={navUser} />
-      <main className="mx-auto w-full max-w-6xl px-4 pt-6 pb-20 sm:pb-6">
+      <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-24 sm:px-6 sm:pb-8 lg:px-8">
         {children}
       </main>
       <BottomNav role={navUser.role} />
