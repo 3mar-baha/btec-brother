@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { Award } from "lucide-react";
 
@@ -34,9 +35,11 @@ function achievements(m: DirectoryMember): string[] {
 export function DirectoryGrid({
   members,
   matrix,
+  isAdmin,
 }: {
   members: DirectoryMember[];
   matrix: CollaborationRow[];
+  isAdmin: boolean;
 }) {
   const matrixByWorker = useMemo(() => {
     const map = new Map<string, CollaborationRow[]>();
@@ -61,8 +64,9 @@ export function DirectoryGrid({
       {members.map((m) => {
         const tags = achievements(m);
         const collab = matrixByWorker.get(m.id) ?? [];
-        return (
-          <Card key={m.id} className="flex flex-col gap-4 p-5">
+
+        const card = (
+          <Card className="flex h-full flex-col gap-4 p-5">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12 border border-border">
                 <AvatarImage src={m.avatar_url ?? undefined} alt={m.full_name} />
@@ -131,6 +135,20 @@ export function DirectoryGrid({
               </p>
             )}
           </Card>
+        );
+
+        if (!isAdmin) {
+          return <div key={m.id}>{card}</div>;
+        }
+
+        return (
+          <Link
+            key={m.id}
+            href={`/profile/${m.id}`}
+            className="block transition-opacity hover:opacity-90"
+          >
+            {card}
+          </Link>
         );
       })}
     </div>

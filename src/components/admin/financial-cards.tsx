@@ -12,11 +12,11 @@ export function FinancialCards({ summary }: { summary: FinancialSummary }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {cards.map((c) => (
         <Card key={c.label} className="p-4">
           <p className="text-xs text-ash">{c.label}</p>
-          <p className="mt-2 font-mono text-lg font-semibold text-ink">
+          <p className="mt-2 font-mono text-xl font-semibold text-ink sm:text-2xl">
             {formatMoney(c.value)} د.أ
           </p>
         </Card>

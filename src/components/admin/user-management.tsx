@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, Lock, X } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -58,13 +58,19 @@ export function UserManagement({ users }: UserManagementProps) {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [roleChoices, setRoleChoices] = useState<Record<string, string>>({});
 
   const pending = users.filter((u) => !u.is_approved && u.is_active);
+
+  function roleFor(u: ManagedUser): string {
+    return roleChoices[u.id] ?? u.requested_role ?? "worker";
+  }
 
   async function approve(user: ManagedUser) {
     setBusyId(user.id);
     const { error } = await supabase.rpc("approve_user", {
       p_user_id: user.id,
+      p_role: roleFor(user) as "admin" | "broker" | "worker",
     });
     setBusyId(null);
 
@@ -167,7 +173,21 @@ export function UserManagement({ users }: UserManagementProps) {
                   </Badge>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={roleFor(u)}
+                    onValueChange={(v) =>
+                      setRoleChoices((prev) => ({ ...prev, [u.id]: v }))
+                    }
+                  >
+                    <SelectTrigger className="h-9 w-24 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="worker">عامل</SelectItem>
+                      <SelectItem value="broker">وسيط</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Button
                     size="sm"
                     disabled={busyId === u.id}
@@ -210,7 +230,7 @@ export function UserManagement({ users }: UserManagementProps) {
           جميع المستخدمين
         </h2>
 
-        <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -251,23 +271,10 @@ export function UserManagement({ users }: UserManagementProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Select
-                      value={u.role}
-                      onValueChange={(v) =>
-                        updateField(u.id, {
-                          role: v as "admin" | "broker" | "worker",
-                        })
-                      }
-                    >
-                      <SelectTrigger className="h-8 w-28">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="worker">عامل</SelectItem>
-                        <SelectItem value="broker">وسيط</SelectItem>
-                        <SelectItem value="admin">مدير</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-bone px-2 py-0.5 text-[11px] font-medium text-ink">
+                      <Lock className="h-3 w-3 text-ash" />
+                      {ROLE_LABELS[u.role] ?? u.role}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <Select

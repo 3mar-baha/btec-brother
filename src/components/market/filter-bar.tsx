@@ -32,8 +32,10 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <span className="text-start text-xs font-medium text-muted-foreground">
+        {label}
+      </span>
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger className="w-full">
           <SelectValue />
@@ -52,7 +54,7 @@ export function FilterBar({
   onChange,
 }: FilterBarProps) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
       <Field
         label="التخصص"
         value={filters.specialisationId}

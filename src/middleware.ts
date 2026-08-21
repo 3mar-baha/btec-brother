@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/market", "/workspace", "/directory", "/logs", "/admin", "/settings"];
+const PROTECTED = ["/market", "/workspace", "/directory", "/logs", "/admin", "/settings", "/profile"];
 
 function redirectTo(pathname: string, request: NextRequest) {
   const url = request.nextUrl.clone();

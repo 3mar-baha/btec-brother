@@ -3,19 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   BarChart3,
   Bell,
   LayoutDashboard,
   LogOut,
-  Menu,
   Settings,
   ShieldCheck,
   ShoppingBag,
+  User,
   Users,
   Wallet,
-  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -75,7 +73,6 @@ function initials(name: string): string {
 export function DashboardNav({ user }: { user: NavUser }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
 
   const items: NavItem[] =
     user.role === "admin"
@@ -99,7 +96,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
             width={958}
             height={212}
             priority
-            className="h-10 w-auto object-contain dark:hidden"
+            className="h-8 w-auto object-contain dark:hidden"
           />
           <Image
             src="/logo-dark.png"
@@ -107,11 +104,11 @@ export function DashboardNav({ user }: { user: NavUser }) {
             width={958}
             height={212}
             priority
-            className="hidden h-10 w-auto object-contain dark:block"
+            className="hidden h-8 w-auto object-contain dark:block"
           />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 sm:flex">
           {items.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -192,15 +189,18 @@ export function DashboardNav({ user }: { user: NavUser }) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="flex flex-col">
+              <DropdownMenuLabel className="flex flex-col gap-1">
                 <span className="text-sm font-medium">{user.fullName}</span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {user.email}
-                </span>
+                <Badge variant="secondary" className="w-fit px-2 py-0 text-[10px]">
+                  {ROLE_LABELS[user.role]}
+                </Badge>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/market">سوق الطلبات</Link>
+                <Link href="/profile">
+                  <User className="h-4 w-4" />
+                  ملفي الشخصي
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings">
@@ -219,43 +219,8 @@ export function DashboardNav({ user }: { user: NavUser }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="القائمة"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
         </div>
       </div>
-
-      {open && (
-        <nav className="flex flex-col gap-1 border-t border-border bg-canvas p-3 md:hidden">
-          {items.map((item) => {
-            const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm",
-                  active
-                    ? "bg-ink text-background"
-                    : "text-muted-foreground hover:bg-bone"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      )}
     </header>
   );
 }

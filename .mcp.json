@@ -14,6 +14,13 @@
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+    },
+    "koboyo": {
+      "type": "http",
+      "url": "https://api.koboyo.com/v1-mcp",
+      "headers": {
+        "Authorization": "Bearer kbi_2c63b6ea919927ebec7399466ccf1aab854486659e7bf96eb035b0fde14bbb52"
+      }
     }
   }
 }

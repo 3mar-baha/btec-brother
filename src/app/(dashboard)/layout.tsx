@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { DashboardNav, type NavUser } from "@/components/dashboard/nav";
 import {
   createClient,
@@ -49,7 +50,10 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-canvas">
       <DashboardNav user={navUser} />
-      <main className="mx-auto w-full max-w-6xl px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 pt-6 pb-20 sm:pb-6">
+        {children}
+      </main>
+      <BottomNav role={navUser.role} />
     </div>
   );
 }

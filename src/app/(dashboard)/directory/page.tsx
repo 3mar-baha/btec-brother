@@ -5,7 +5,11 @@ import type {
   CollaborationRow,
   DirectoryMember,
 } from "@/components/directory/types";
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import {
+  createClient,
+  getCurrentProfile,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +19,10 @@ export default async function DirectoryPage() {
 
   if (!user) redirect("/login");
 
-  const { data } = await supabase.rpc("directory_stats");
+  const [profile, { data }] = await Promise.all([
+    getCurrentProfile(user.id),
+    supabase.rpc("directory_stats"),
+  ]);
 
   const members = (data?.members ?? []) as DirectoryMember[];
   const matrix = (data?.matrix ?? []) as CollaborationRow[];
@@ -31,7 +38,11 @@ export default async function DirectoryPage() {
         </p>
       </div>
 
-      <DirectoryGrid members={members} matrix={matrix} />
+      <DirectoryGrid
+        members={members}
+        matrix={matrix}
+        isAdmin={profile?.role === "admin"}
+      />
     </div>
   );
 }
