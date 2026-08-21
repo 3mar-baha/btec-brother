@@ -62,28 +62,35 @@ export function WorkerWorkspace({
   async function handleAddUpdate(note: string) {
     if (!activeTask) return;
     setAddingUpdate(true);
-    const { data, error } = await supabase
-      .from("daily_updates")
-      .insert({ order_id: activeTask.id, note })
-      .select("id, order_id, author_id, note, created_at")
-      .single();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error } = await supabase.from("daily_updates").insert({
+      order_id: activeTask.id,
+      note,
+      ...(user ? { author_id: user.id } : {}),
+    });
     setAddingUpdate(false);
 
-    if (error || !data) {
+    if (error) {
       toast({
         title: "تعذر إضافة التحديث",
-        description: error?.message ?? "حدث خطأ غير متوقع",
+        description: error.message,
         variant: "destructive",
       });
       return;
     }
 
-    await supabase.from("activity_logs").insert({
-      order_id: activeTask.id,
-      actor_id: data.author_id,
-      action: "daily_update",
-      details: note,
-    });
+    if (user) {
+      await supabase.from("activity_logs").insert({
+        order_id: activeTask.id,
+        actor_id: user.id,
+        action: "daily_update",
+        details: note,
+      });
+    }
 
     toast({ title: "تمت إضافة التحديث" });
     router.refresh();
