@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { animate, createTimeline, spring, stagger } from "animejs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function translateAuthError(message: string): string {
   if (/invalid login credentials/i.test(message)) {
@@ -75,6 +79,11 @@ export default function LoginPage() {
   const [signupLoading, setSignupLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  const logoRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const authRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
@@ -86,6 +95,44 @@ export default function LoginPage() {
       setAuthError("تعذر تسجيل الدخول عبر Telegram. حاول مرة أخرى.");
     }
   }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    const logo = logoRef.current;
+    const subtitle = subtitleRef.current;
+    const auth = authRef.current;
+    if (!logo || !subtitle || !auth) return;
+
+    const tl = createTimeline({ defaults: { ease: "outCubic" } });
+    tl.add(logo, {
+      opacity: [0, 1],
+      scale: [0.85, 1],
+      duration: 600,
+      ease: spring({ stiffness: 200, damping: 18 }),
+    })
+      .add(subtitle, { opacity: [0, 1], translateY: [14, 0], duration: 450 }, "-=350")
+      .add(auth, { opacity: [0, 1], translateY: [20, 0], duration: 450 }, "-=300");
+
+    return () => {
+      tl.pause();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showEmail) return;
+    const form = formRef.current;
+    if (!form) return;
+    const fields = Array.from(form.children) as HTMLElement[];
+    const animation = animate(fields, {
+      opacity: [0, 1],
+      translateY: [10, 0],
+      duration: 400,
+      ease: "outCubic",
+      delay: stagger(40),
+    });
+    return () => {
+      animation.pause();
+    };
+  }, [showEmail, mode]);
 
   function setSignupField<K extends keyof typeof EMPTY_SIGNUP>(
     field: K,
@@ -170,48 +217,42 @@ export default function LoginPage() {
     }
 
     setSignupLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email: signupEmail.trim(),
-      password: signupPassword,
-      options: {
-        data: {
-          full_name: full_name.trim(),
-          phone_number: phone_number.trim(),
-          requested_role: signup.requested_role,
-        },
-      },
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: signupEmail.trim(),
+        password: signupPassword,
+        full_name: full_name.trim(),
+        phone_number: phone_number.trim(),
+        requested_role: signup.requested_role,
+      }),
     });
+    const json = await res.json().catch(() => null);
     setSignupLoading(false);
 
-    if (error) {
+    if (!res.ok || !json?.success) {
       toast({
         title: "تعذر إنشاء الحساب",
-        description: translateAuthError(error.message),
+        description: translateAuthError(
+          typeof json?.error === "string" ? json.error : "حدث خطأ غير متوقع"
+        ),
         variant: "destructive",
       });
       return;
     }
 
-    if (data.session) {
-      toast({
-        title: "تم إنشاء الحساب",
-        description: "حسابك قيد المراجعة بانتظار موافقة المدير",
-      });
-      router.push("/pending-approval");
-      router.refresh();
-    } else {
-      toast({
-        title: "تحقق من بريدك",
-        description: "أرسلنا رابط تأكيد إلى بريدك، وبعد التأكيد سيكون حسابك قيد المراجعة",
-      });
-      setMode("signin");
-    }
+    toast({
+      title: "تم إنشاء الحساب",
+      description: "حسابك قيد المراجعة بانتظار موافقة المدير",
+    });
+    router.push(json.redirect ?? "/pending-approval");
+    router.refresh();
   }
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col items-center gap-3">
+      <div ref={logoRef} className="flex flex-col items-center gap-3">
         <Image
           src="/logo-light.png"
           alt="BTEC Hub"
@@ -228,7 +269,7 @@ export default function LoginPage() {
           priority
           className="hidden h-16 w-auto object-contain dark:block"
         />
-        <p className="text-center text-sm text-muted-foreground">
+        <p ref={subtitleRef} className="text-center text-sm text-muted-foreground">
           منصة إدارة مهام BTEC الداخلية
         </p>
       </div>
@@ -239,7 +280,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div ref={authRef} className="flex flex-col gap-3">
         <TelegramLoginButton />
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -290,7 +331,7 @@ export default function LoginPage() {
       </div>
 
       {mode === "signin" ? (
-        <form onSubmit={handleSignIn} className="flex flex-col gap-5">
+        <form ref={formRef} onSubmit={handleSignIn} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
@@ -322,7 +363,7 @@ export default function LoginPage() {
           </Button>
         </form>
       ) : (
-        <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+        <form ref={formRef} onSubmit={handleSignUp} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="signup-name">الاسم الثلاثي</Label>
             <Input

@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { SESSION_MAX_AGE } from "@/lib/session";
+
 const PROTECTED = ["/market", "/workspace", "/directory", "/logs", "/admin", "/settings", "/profile"];
 
 function redirectTo(pathname: string, request: NextRequest) {
@@ -17,6 +19,10 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -27,7 +33,7 @@ export async function middleware(request: NextRequest) {
           );
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, { ...options, maxAge: SESSION_MAX_AGE })
           );
         },
       },

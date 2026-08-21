@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { SESSION_MAX_AGE } from "@/lib/session";
 import type { Database } from "@/types/database.types";
 
 export async function createClient() {
@@ -11,6 +12,10 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -18,7 +23,7 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, { ...options, maxAge: SESSION_MAX_AGE })
             );
           } catch {
             // Called from a Server Component. Safe to ignore when middleware

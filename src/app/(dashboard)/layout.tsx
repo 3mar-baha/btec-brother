@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { DashboardNav, type NavUser } from "@/components/dashboard/nav";
+import { PageTransition } from "@/components/dashboard/page-transition";
 import {
   createClient,
   getCurrentProfile,
@@ -51,7 +52,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-canvas">
       <DashboardNav user={navUser} />
       <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-24 sm:px-6 sm:pb-8 lg:px-8">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav role={navUser.role} />
     </div>
