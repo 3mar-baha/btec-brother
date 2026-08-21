@@ -102,15 +102,15 @@ export default function LoginPage() {
     const auth = authRef.current;
     if (!logo || !subtitle || !auth) return;
 
-    const tl = createTimeline({ defaults: { ease: "outCubic" } });
+    const tl = createTimeline({ defaults: { ease: "outBack" } });
     tl.add(logo, {
       opacity: [0, 1],
-      scale: [0.85, 1],
-      duration: 600,
-      ease: spring({ stiffness: 200, damping: 18 }),
+      scale: [0.7, 1],
+      duration: 800,
+      ease: spring({ stiffness: 180, damping: 12 }),
     })
-      .add(subtitle, { opacity: [0, 1], translateY: [14, 0], duration: 450 }, "-=350")
-      .add(auth, { opacity: [0, 1], translateY: [20, 0], duration: 450 }, "-=300");
+      .add(subtitle, { opacity: [0, 1], translateY: [30, 0], duration: 600 }, "-=400")
+      .add(auth, { opacity: [0, 1], translateY: [44, 0], scale: [0.95, 1], duration: 700 }, "-=350");
 
     return () => {
       tl.pause();
@@ -124,10 +124,11 @@ export default function LoginPage() {
     const fields = Array.from(form.children) as HTMLElement[];
     const animation = animate(fields, {
       opacity: [0, 1],
-      translateY: [10, 0],
-      duration: 400,
-      ease: "outCubic",
-      delay: stagger(40),
+      translateY: [28, 0],
+      scale: [0.96, 1],
+      duration: 600,
+      ease: "outBack",
+      delay: stagger(70),
     });
     return () => {
       animation.pause();

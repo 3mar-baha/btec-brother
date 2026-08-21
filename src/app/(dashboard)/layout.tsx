@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { DashboardNav, type NavUser } from "@/components/dashboard/nav";
 import { PageTransition } from "@/components/dashboard/page-transition";
@@ -49,7 +50,8 @@ export default async function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-screen">
+      <AnimatedBackground />
       <DashboardNav user={navUser} />
       <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-24 sm:px-6 sm:pb-8 lg:px-8">
         <PageTransition>{children}</PageTransition>

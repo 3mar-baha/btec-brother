@@ -7,8 +7,8 @@ const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /**
- * Subtle staggered fade-in-up for all direct children of the returned ref.
- * Re-runs whenever an entry in `deps` changes (e.g. the list itself changes).
+ * Dramatic staggered entrance: children scale up from below with an elastic
+ * overshoot. Re-runs whenever an entry in `deps` changes (e.g. the list itself).
  */
 export function useStaggeredEntrance<T extends HTMLElement>(
   deps: React.DependencyList = []
@@ -23,10 +23,11 @@ export function useStaggeredEntrance<T extends HTMLElement>(
 
     const animation = animate(items, {
       opacity: [0, 1],
-      translateY: [16, 0],
-      duration: 500,
-      ease: "outCubic",
-      delay: stagger(60),
+      translateY: [48, 0],
+      scale: [0.9, 1],
+      duration: 800,
+      ease: "outBack",
+      delay: stagger(90),
     });
 
     return () => {
@@ -38,7 +39,7 @@ export function useStaggeredEntrance<T extends HTMLElement>(
   return ref;
 }
 
-/** Fades a single element in on mount. */
+/** Single-element dramatic entrance on mount (scale + slide + overshoot). */
 export function useEntrance<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
 
@@ -48,9 +49,10 @@ export function useEntrance<T extends HTMLElement>() {
 
     const animation = animate(el, {
       opacity: [0, 1],
-      translateY: [12, 0],
-      duration: 400,
-      ease: "outCubic",
+      translateY: [40, 0],
+      scale: [0.92, 1],
+      duration: 750,
+      ease: "outBack",
     });
 
     return () => {
@@ -61,7 +63,82 @@ export function useEntrance<T extends HTMLElement>() {
   return ref;
 }
 
-/** Spring scale micro-interaction for pressable elements (hover/press/release). */
+/** Entrance + hover lift, combined so a single element owns its transform. */
+export function useCardMotion<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const animation = animate(el, {
+      opacity: [0, 1],
+      translateY: [40, 0],
+      scale: [0.92, 1],
+      duration: 750,
+      ease: "outBack",
+    });
+
+    return () => {
+      animation.pause();
+    };
+  }, []);
+
+  const onMouseEnter = () => {
+    const el = ref.current;
+    if (!el) return;
+    animate(el, {
+      translateY: -10,
+      scale: 1.03,
+      duration: 300,
+      ease: spring({ stiffness: 300, damping: 12 }),
+    });
+  };
+
+  const onMouseLeave = () => {
+    const el = ref.current;
+    if (!el) return;
+    animate(el, {
+      translateY: 0,
+      scale: 1,
+      duration: 450,
+      ease: spring({ stiffness: 200, damping: 14 }),
+    });
+  };
+
+  return { ref, onMouseEnter, onMouseLeave };
+}
+
+/** Hover lift + scale for cards whose entrance is handled elsewhere. */
+export function useHoverLift<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  const onMouseEnter = () => {
+    const el = ref.current;
+    if (!el) return;
+    animate(el, {
+      translateY: -10,
+      scale: 1.03,
+      duration: 300,
+      ease: spring({ stiffness: 300, damping: 12 }),
+    });
+  };
+
+  const onMouseLeave = () => {
+    const el = ref.current;
+    if (!el) return;
+    animate(el, {
+      translateY: 0,
+      scale: 1,
+      duration: 450,
+      ease: spring({ stiffness: 200, damping: 14 }),
+    });
+  };
+
+  return { ref, onMouseEnter, onMouseLeave };
+}
+
+/** Elastic spring micro-interaction for pressable elements (hover/press/release). */
 export function useSpringPress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
 
@@ -69,9 +146,9 @@ export function useSpringPress<T extends HTMLElement>() {
     const el = ref.current;
     if (!el) return;
     animate(el, {
-      scale: 1.03,
-      duration: 220,
-      ease: spring({ stiffness: 400, damping: 15 }),
+      scale: 1.06,
+      duration: 260,
+      ease: spring({ stiffness: 400, damping: 12 }),
     });
   };
 
@@ -80,8 +157,8 @@ export function useSpringPress<T extends HTMLElement>() {
     if (!el) return;
     animate(el, {
       scale: 1,
-      duration: 260,
-      ease: spring({ stiffness: 400, damping: 15 }),
+      duration: 420,
+      ease: spring({ stiffness: 300, damping: 12 }),
     });
   };
 
@@ -89,9 +166,9 @@ export function useSpringPress<T extends HTMLElement>() {
     const el = ref.current;
     if (!el) return;
     animate(el, {
-      scale: 0.96,
-      duration: 120,
-      ease: spring({ stiffness: 500, damping: 20 }),
+      scale: 0.92,
+      duration: 140,
+      ease: spring({ stiffness: 500, damping: 16 }),
     });
   };
 
@@ -100,15 +177,15 @@ export function useSpringPress<T extends HTMLElement>() {
     if (!el) return;
     animate(el, {
       scale: 1,
-      duration: 300,
-      ease: spring({ stiffness: 500, damping: 18 }),
+      duration: 500,
+      ease: spring({ stiffness: 400, damping: 10 }),
     });
   };
 
   return { ref, onMouseEnter, onMouseLeave, onMouseDown, onMouseUp };
 }
 
-/** Continuous scale pulse while `active` is true (e.g. an urgent deadline). */
+/** Stronger continuous scale pulse while `active` is true (e.g. urgent deadline). */
 export function usePulse<T extends HTMLElement>(active: boolean) {
   const ref = useRef<T | null>(null);
 
@@ -117,8 +194,8 @@ export function usePulse<T extends HTMLElement>(active: boolean) {
     if (!active || !el) return;
 
     const animation = animate(el, {
-      scale: [1, 1.06, 1],
-      duration: 1200,
+      scale: [1, 1.1, 1],
+      duration: 900,
       ease: "inOutSine",
       loop: true,
     });

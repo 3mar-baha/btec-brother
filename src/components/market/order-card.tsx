@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePulse, useSpringPress } from "@/hooks/use-motion";
+import { useHoverLift, usePulse, useSpringPress } from "@/hooks/use-motion";
 import { criteriaBadgeClass } from "@/lib/criteria";
 import { countdown, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -50,9 +50,10 @@ export function OrderCard({
   const urgentRef = usePulse<HTMLSpanElement>(timer.urgent);
   const { ref: claimRef, ...claimHandlers } =
     useSpringPress<HTMLButtonElement>();
+  const { ref: cardRef, ...hoverHandlers } = useHoverLift<HTMLDivElement>();
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <Card ref={cardRef} {...hoverHandlers} className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {code && (
