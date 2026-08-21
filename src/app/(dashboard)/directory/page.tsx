@@ -19,13 +19,13 @@ export default async function DirectoryPage() {
 
   if (!user) redirect("/login");
 
-  const [profile, { data }] = await Promise.all([
+  const [profile, statsRes] = await Promise.all([
     getCurrentProfile(user.id),
     supabase.rpc("directory_stats"),
   ]);
 
-  const members = (data?.members ?? []) as DirectoryMember[];
-  const matrix = (data?.matrix ?? []) as CollaborationRow[];
+  const members = (statsRes.data?.members ?? []) as DirectoryMember[];
+  const matrix = (statsRes.data?.matrix ?? []) as CollaborationRow[];
 
   return (
     <div className="space-y-6">
@@ -37,6 +37,12 @@ export default async function DirectoryPage() {
           أعضاء الفريق وإحصائيات الإنجاز
         </p>
       </div>
+
+      {statsRes.error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-relaxed text-destructive">
+          تعذر تحميل دليل الفريق: {statsRes.error.message}
+        </div>
+      )}
 
       <DirectoryGrid
         members={members}
