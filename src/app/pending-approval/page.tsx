@@ -1,23 +1,21 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Clock, Loader2, LogOut } from "lucide-react";
+import { Clock } from "lucide-react";
+import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
+import { SignOutButton } from "@/components/pending-approval/sign-out-button";
+import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
 
-export default function PendingApprovalPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+export const dynamic = "force-dynamic";
 
-  async function handleSignOut() {
-    setLoading(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+export default async function PendingApprovalPage() {
+  const user = await getCurrentUser();
+
+  if (!user) redirect("/login");
+
+  const profile = await getCurrentProfile(user.id);
+
+  if (profile?.is_approved === true) {
+    redirect(profile.role === "admin" ? "/admin" : "/market");
   }
 
   return (
@@ -50,21 +48,7 @@ export default function PendingApprovalPage() {
           قريباً.
         </p>
 
-        <Button
-          onClick={handleSignOut}
-          disabled={loading}
-          variant="outline"
-          className="mt-6 w-full"
-        >
-          {loading ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <>
-              <LogOut className="h-4 w-4" />
-              تسجيل الخروج
-            </>
-          )}
-        </Button>
+        <SignOutButton />
       </div>
     </div>
   );

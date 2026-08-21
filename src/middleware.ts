@@ -61,10 +61,10 @@ export async function middleware(request: NextRequest) {
   // Authenticated: gate on approval status.
   const { data: profile } = await supabase
     .from("users")
-    .select("is_approved")
+    .select("is_approved, role")
     .eq("id", user.id)
     .single();
-  const isApproved = profile?.is_approved === true;
+  const isApproved = profile?.is_approved === true || profile?.role === "admin";
 
   if (pathname === "/login") {
     return redirectTo(isApproved ? "/market" : "/pending-approval", request);
@@ -78,7 +78,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname === "/pending-approval") {
-    return redirectTo("/market", request);
+    return redirectTo(profile?.role === "admin" ? "/admin" : "/market", request);
   }
 
   return response;
