@@ -2,11 +2,29 @@
   "name": "btec-hub",
   "version": "0.1.0",
   "private": true,
+  "description": "منصة لإدارة طلبات ومهام BTEC — تربط الوسطاء والعاملين والإدارة في سير عمل واحد.",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/3mar-baha/btec-hub.git"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "keywords": [
+    "btec",
+    "education",
+    "nextjs",
+    "supabase",
+    "task-management",
+    "rtl"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
