@@ -27,3 +27,23 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Node 22+ runs the TypeScript suites directly (native type stripping).
+      - name: Unit tests
+        run: node --test tests/unit/

@@ -1,0 +1,59 @@
+name: 🐛 Bug report
+description: Report something broken or behaving incorrectly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        شكراً لإبلاغك! — Please fill in the details below. For security vulnerabilities,
+        follow [SECURITY.md](../blob/main/SECURITY.md) instead (email, no public issue).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Expected vs actual behavior, in Arabic or English.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Login as …
+        2. Go to …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Market (سوق الطلبات)
+        - Workspace (لوحة العمل)
+        - Clients CRM (العملاء)
+        - Directory (دليل الفريق)
+        - Logs (السجلات)
+        - Admin (لوحة الإدارة)
+        - Auth / access control
+        - Database / RLS
+        - Telegram notifications
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Affected role
+      options:
+        - Admin (مدير)
+        - Broker (وسيط)
+        - Worker (عامل)
+        - All roles
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots / logs
+      description: Attach screenshots or console output if available.

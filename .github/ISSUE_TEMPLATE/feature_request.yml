@@ -1,0 +1,41 @@
+name: ✨ Feature request
+description: Suggest a new capability or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do that the app doesn't support today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should happen? Sketch the flow or screen.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Market (سوق الطلبات)
+        - Workspace (لوحة العمل)
+        - Clients CRM (العملاء)
+        - Directory (دليل الفريق)
+        - Logs (السجلات)
+        - Admin (لوحة الإدارة)
+        - Auth / access control
+        - Database / RLS
+        - Telegram notifications
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This may require a database migration (schema / RLS / RPC)

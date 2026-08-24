@@ -7,6 +7,12 @@
 </div>
 
 <p align="center">
+  <a href="https://github.com/3mar-baha/btec-hub/actions/workflows/ci.yml">
+    <img src="https://github.com/3mar-baha/btec-hub/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+</p>
+
+<p align="center">
   <a href="#features">Features</a> ·
   <a href="#roles--workflow">Roles</a> ·
   <a href="#tech-stack">Tech Stack</a> ·
@@ -35,6 +41,10 @@ The app is fully Arabic (RTL), production-hosted on Vercel, and backed by Supaba
 - **Email/password & Telegram authentication** — sign up, verify, and link a Telegram account for notifications.
 - **Approval workflow** — new accounts land on a pending-approval page until an admin approves them.
 - **Open-pool order market** — brokers publish orders; workers claim one active task at a time.
+- **Clients CRM** (`/clients`, admin + broker only) — client directory aggregated from orders with
+  composable multi-criteria filters (grade, criteria level, school, specialisation, broker, activity
+  status), omni-search, four sort keys, URL-synced filter state, per-client order-history drawer,
+  WhatsApp quick actions, and one-click order prefill.
 - **Daily task updates** — workers post progress notes against their in-progress order.
 - **Team directory** — public member listing with earnings (admins are excluded from stats).
 - **Activity logs** — full audit trail of order and payment actions.
@@ -48,7 +58,7 @@ The app is fully Arabic (RTL), production-hosted on Vercel, and backed by Supaba
 | Role            | Arabic    | Capabilities                                                                 |
 | --------------- | --------- | ---------------------------------------------------------------------------- |
 | **Admin**       | مدير      | Approves users, edits profiles, promotes roles, monitors logs, settles payouts |
-| **Broker**      | وسيط      | Creates orders, tracks client orders, approves submission → completion        |
+| **Broker**      | وسيط      | Creates orders, manages the clients CRM, approves submission → completion     |
 | **Worker**      | عامل      | Claims tasks from the open pool, posts daily updates, submits completed work  |
 
 ```
@@ -65,10 +75,9 @@ broker creates order  →  worker claims (open pool)  →  worker posts daily up
 | Language     | TypeScript                                                               |
 | Styling      | [Tailwind CSS v3](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) (Radix) |
 | Backend      | [Supabase](https://supabase.com) — Postgres, Auth, RLS, Realtime, RPC    |
-| Data fetching| TanStack Query + Supabase JS client                                     |
-| Forms        | React Hook Form + Zod                                                    |
+| Data fetching| Supabase JS client (React Server Components + client components)         |
 | Animation    | Anime.js                                                                 |
-| Testing      | [Playwright](https://playwright.dev)                                     |
+| Testing      | [Playwright](https://playwright.dev) (E2E) + Node test runner (unit)     |
 
 ## Getting Started
 
@@ -133,7 +142,13 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Testing
 
-End-to-end tests use Playwright against a **staging** Supabase project (never production).
+**Unit tests** cover the clients-CRM aggregation/filter/sort logic — no environment needed:
+
+```bash
+node --test tests/unit/
+```
+
+**End-to-end tests** use Playwright against a **staging** Supabase project (never production).
 
 ```bash
 # 1. Create .env.staging with the same 7 variables pointing at the staging project
@@ -146,8 +161,10 @@ npx playwright install
 npm run test:e2e
 ```
 
-Tests cover authentication, role-based UI, the team directory, daily task updates,
-and header balance correctness.
+E2E coverage: authentication, role-based access control (including the clients CRM guards),
+the clients directory (stats, aggregation, all eight filters, sorting, history drawer,
+order-form prefill), the team directory, daily task updates, and header balance correctness.
+The clients spec seeds deterministic fixtures on staging and deletes them after the run.
 
 ## Deployment
 
@@ -164,10 +181,10 @@ The project is deployed on [Vercel](https://vercel.com) (`fra1` region). Pushing
 src/
   app/                    # App Router pages + API route handlers
     (auth)/login/         # login page
-    (dashboard)/          # market, workspace, directory, profile, logs, admin, settings
+    (dashboard)/          # market, workspace, clients, directory, profile, logs, admin, settings
     api/                  # auth (register, telegram), telegram webhook
     pending-approval/     # post-signup approval screen
-  components/             # feature components (dashboard, market, workspace, admin…)
+  components/             # feature components (dashboard, market, workspace, clients, admin…)
   lib/                    # Supabase clients, helpers, utils
   hooks/                  # shared React hooks
 supabase/
@@ -177,6 +194,7 @@ supabase/
   migrations/             # incremental SQL migrations
 tests/
   e2e/                    # Playwright specs + helpers
+  unit/                   # node --test unit suites (clients aggregation logic)
 ```
 
 ## Security

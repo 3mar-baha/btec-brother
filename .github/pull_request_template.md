@@ -26,6 +26,7 @@
 
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
+- [ ] `node --test tests/unit/`
 - [ ] `npm run test:e2e` (staging)
 
 ## Checklist
