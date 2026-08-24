@@ -63,6 +63,7 @@ export default async function ClientsPage() {
         criteriaLevels={(criteriaRes.data ?? []) as CriteriaLevel[]}
         brokers={(usersRes.data ?? []) as BrokerOption[]}
         role={profile.role as "admin" | "broker"}
+        currentUserId={user.id}
       />
     </Suspense>
   );

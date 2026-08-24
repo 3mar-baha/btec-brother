@@ -1,6 +1,6 @@
 "use client";
 
-import { History, MessageCircle, Plus } from "lucide-react";
+import { History, MessageCircle, Plus, StickyNote } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { criteriaBadgeClass } from "@/lib/criteria";
 import { formatMoney, formatDate, countdown } from "@/lib/format";
 import { statusBadgeClass, statusLabel } from "@/components/workspace/labels";
-import { whatsappHref } from "./aggregate";
+import { phoneKey, whatsappHref } from "./aggregate";
+import { ClientNotesPanel } from "./client-notes";
 import type { ClientAggregate, CriteriaLevel } from "./types";
 
 interface ClientDrawerProps {
@@ -24,6 +26,7 @@ interface ClientDrawerProps {
   criteriaById: Map<number, CriteriaLevel>;
   brokerName: (id: string) => string;
   canCreateOrder: boolean;
+  isAdmin: boolean;
   onClose: () => void;
   onCreateOrder: (client: ClientAggregate) => void;
 }
@@ -35,6 +38,7 @@ export function ClientDrawer({
   criteriaById,
   brokerName,
   canCreateOrder,
+  isAdmin,
   onClose,
   onCreateOrder,
 }: ClientDrawerProps) {
@@ -89,11 +93,19 @@ export function ClientDrawer({
           )}
         </div>
 
-        <div className="space-y-3 border-t border-border pt-4">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <History className="h-3.5 w-3.5" />
-            سجل الطلبات ({client.orders.length})
-          </p>
+        <Tabs defaultValue="history" className="border-t border-border pt-4">
+          <TabsList className="w-full rounded-full bg-bone p-1 dark:bg-surface-dark">
+            <TabsTrigger value="history" className="flex-1 gap-1.5 rounded-full">
+              <History className="h-3.5 w-3.5" />
+              سجل الطلبات ({client.orders.length})
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="flex-1 gap-1.5 rounded-full">
+              <StickyNote className="h-3.5 w-3.5" />
+              الملاحظات الإدارية
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="history" className="mt-3 space-y-3">
           {[...client.orders]
             .sort((a, b) => b.created_at.localeCompare(a.created_at))
             .map((o) => {
@@ -162,7 +174,15 @@ export function ClientDrawer({
                 </div>
               );
             })}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="notes" className="mt-3">
+            <ClientNotesPanel
+              phoneKey={phoneKey(client.phone, client.name)}
+              canDeleteAny={isAdmin}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

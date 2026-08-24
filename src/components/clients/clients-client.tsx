@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CreateOrderModal } from "@/components/market/create-order-modal";
 import { formatMoney, formatDate } from "@/lib/format";
+import { createClient } from "@/lib/supabase/client";
 import { downloadTextFile, toCsv, type CsvCell } from "@/lib/export";
 import { DEFAULT_FILTERS } from "./types";
 import { buildClients, whatsappHref } from "./aggregate";
@@ -49,7 +50,11 @@ interface ClientsClientProps {
   criteriaLevels: CriteriaLevel[];
   brokers: BrokerOption[];
   role: "admin" | "broker";
+  currentUserId: string;
 }
+
+const ORDER_COLUMNS =
+  "id, order_number, broker_id, title, unit_title, assignment_name, client_name, client_phone, client_school, specialisation_id, grade_id, criteria_id, total_price, deadline, status, created_at, completed_at";
 
 function readFilters(params: URLSearchParams): ClientFilters {
   const get = (k: string) => params.get(k)?.trim() || "";
@@ -84,8 +89,35 @@ export function ClientsClient({
   criteriaLevels,
   brokers,
   role,
+  currentUserId,
 }: ClientsClientProps) {
   const router = useRouter();
+  const [supabase] = useState(() => createClient());
+  const [orders, setOrders] = useState<ClientOrder[]>(initialOrders);
+
+  // Live sync: refetch the scoped order set when any order changes.
+  const loadOrders = useCallback(async () => {
+    let query = supabase.from("orders").select(ORDER_COLUMNS);
+    if (role === "broker") query = query.eq("broker_id", currentUserId);
+    const { data, error } = await query.order("created_at", { ascending: false });
+    if (!error) setOrders((data ?? []) as ClientOrder[]);
+  }, [supabase, role, currentUserId]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("clients-orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          void loadOrders();
+        }
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [supabase, loadOrders]);
 
   // URL is the single source of truth; history.replaceState keeps it shallow
   // (no server round-trip on every filter change). Defaults render on the
@@ -159,16 +191,16 @@ export function ClientsClient({
 
   const view = useMemo(
     () =>
-      buildClients(initialOrders, filters, criteriaCodeById),
-    [initialOrders, filters, criteriaCodeById]
+      buildClients(orders, filters, criteriaCodeById),
+    [orders, filters, criteriaCodeById]
   );
   const { clients, stats } = view;
 
   const schools = useMemo(() => {
     const set = new Set<string>();
-    for (const o of initialOrders) if (o.client_school) set.add(o.client_school);
+    for (const o of orders) if (o.client_school) set.add(o.client_school);
     return Array.from(set).sort((a, b) => a.localeCompare(b, "ar"));
-  }, [initialOrders]);
+  }, [orders]);
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const selected = selectedKey
@@ -412,6 +444,7 @@ export function ClientsClient({
           criteriaById={new Map(criteriaLevels.map((c) => [c.id, c]))}
           brokerName={brokerName}
           canCreateOrder={role === "broker"}
+          isAdmin={role === "admin"}
           onClose={() => setSelectedKey(null)}
           onCreateOrder={(c) => {
             setSelectedKey(null);
@@ -433,7 +466,10 @@ export function ClientsClient({
           specialisations={specialisations}
           gradeLevels={gradeLevels}
           criteriaLevels={criteriaLevels}
-          onCreated={() => router.refresh()}
+          onCreated={() => {
+            void loadOrders();
+            router.refresh();
+          }}
         />
       )}
     </div>
