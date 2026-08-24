@@ -47,12 +47,18 @@ export const getCurrentUser = cache(async () => {
 });
 
 // Single shared profile row for role/full_name/avatar across layout + pages.
+// Throws on failure so the route segment's error boundary surfaces it —
+// swallowing the error here would silently render every caller as an
+// unapproved "worker" (callers fall back via `profile?.role ?? "worker"`).
 export const getCurrentProfile = cache(async (userId: string) => {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("users")
     .select("role, full_name, avatar_url, is_approved")
     .eq("id", userId)
     .single();
+  if (error) {
+    throw new Error(`تعذر تحميل بيانات الحساب: ${error.message}`);
+  }
   return data;
 });
