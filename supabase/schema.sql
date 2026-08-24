@@ -193,9 +193,11 @@ execute function public.check_worker_active_task_limit();
 
 -- ---------------------------------------------------------------------------
 -- Trigger: create a public.users row on auth sign-up.
--- New sign-ups default to unapproved (is_approved = false); only the seeded
--- admin email is auto-approved with the admin role. requested_role is read
--- from user metadata ('worker' | 'broker').
+-- Every sign-up is an unapproved worker/broker request. Admins are
+-- provisioned explicitly after signup:
+--   update public.users set role = 'admin', is_approved = true
+--   where email = '<your-email>';
+-- requested_role is read from user metadata ('worker' | 'broker').
 -- ---------------------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -218,9 +220,9 @@ begin
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', new.email),
-    case when new.email = 'admin@btechub.app' then 'admin'::public.user_role else 'worker'::public.user_role end,
+    'worker'::public.user_role,
     nullif(new.raw_user_meta_data ->> 'phone_number', ''),
-    (new.email = 'admin@btechub.app'),
+    false,
     v_requested_role
   )
   on conflict (id) do nothing;
