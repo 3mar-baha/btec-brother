@@ -33,6 +33,7 @@ const EMPTY_FORM = {
   title: "",
   client_name: "",
   client_phone: "",
+  client_school: "",
   specialisation_id: "",
   grade_id: "",
   criteria_id: "",
@@ -149,6 +150,7 @@ export function CreateOrderModal({
         title: form.title.trim(),
         client_name: form.client_name.trim(),
         client_phone: form.client_phone.trim(),
+        client_school: form.client_school.trim() || null,
         specialisation_id: Number(form.specialisation_id),
         grade_id: Number(form.grade_id),
         criteria_id: Number(form.criteria_id),
@@ -291,6 +293,14 @@ export function CreateOrderModal({
                 dir="ltr"
                 value={form.client_phone}
                 onChange={(e) => setField("client_phone", e.target.value)}
+              />
+            </Field>
+
+            <Field label="مدرسة العميل">
+              <Input
+                value={form.client_school}
+                onChange={(e) => setField("client_school", e.target.value)}
+                placeholder="اختياري"
               />
             </Field>
 

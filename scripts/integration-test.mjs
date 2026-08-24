@@ -131,6 +131,7 @@ try {
     title: "طلب اختبار تكامل",
     client_name: "عميل تجريبي",
     client_phone: "0790000000",
+    client_school: "مدرسة الاختبار",
     specialisation_id: specId,
     grade_id: gradeId,
     criteria_id: critId,

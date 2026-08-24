@@ -160,6 +160,7 @@ export type Database = {
           title: string;
           client_name: string;
           client_phone: string;
+          client_school: string | null;
           specialisation_id: number;
           grade_id: number;
           criteria_id: number;
@@ -185,6 +186,7 @@ export type Database = {
           title: string;
           client_name: string;
           client_phone: string;
+          client_school?: string | null;
           specialisation_id: number;
           grade_id: number;
           criteria_id: number;
@@ -208,6 +210,7 @@ export type Database = {
           title?: string;
           client_name?: string;
           client_phone?: string;
+          client_school?: string | null;
           specialisation_id?: number;
           grade_id?: number;
           criteria_id?: number;

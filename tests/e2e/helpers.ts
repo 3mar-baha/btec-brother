@@ -86,6 +86,7 @@ export async function seedWorkerActiveTask() {
     title: "مهمة اختبار التحديث اليومي",
     client_name: "عميل اختبار",
     client_phone: "0790000000",
+    client_school: "مدرسة الاختبار",
     specialisation_id: specs[0].id,
     grade_id: grades[0].id,
     criteria_id: crits[0].id,

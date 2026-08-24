@@ -97,6 +97,7 @@ create table if not exists public.orders (
   title             text not null,
   client_name       text not null,  -- hidden from workers (see RLS note)
   client_phone      text not null,  -- hidden from workers (see RLS note)
+  client_school     text,           -- optional; hidden from workers like other client fields
   specialisation_id int not null references public.specialisations (id),
   grade_id          int not null references public.grade_levels (id),
   criteria_id       int not null references public.criteria_levels (id),
@@ -792,7 +793,7 @@ create policy "criteria_levels_admin_write" on public.criteria_levels
 alter table public.orders enable row level security;
 
 -- Open orders are visible to everyone; otherwise only broker/worker/admin.
--- client_name / client_phone are hidden from workers at the query layer.
+-- client_name / client_phone / client_school are hidden from workers at the query layer.
 drop policy if exists "orders_select" on public.orders;
 create policy "orders_select" on public.orders
   for select using (
