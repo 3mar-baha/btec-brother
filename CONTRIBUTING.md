@@ -26,7 +26,7 @@ Database setup and environment variables are documented in the [README](README.m
 ```bash
 npm run lint                  # 0 errors
 npm run typecheck             # 0 errors
-node --test tests/unit/       # unit suites pass
+node --test "tests/unit/*.test.ts"  # unit suites pass
 npm run test:e2e              # Playwright, against STAGING only (needs .env.staging)
 ```
 

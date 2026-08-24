@@ -145,7 +145,7 @@ Open [http://localhost:3000](http://localhost:3000).
 **Unit tests** cover the clients-CRM aggregation/filter/sort logic — no environment needed:
 
 ```bash
-node --test tests/unit/
+node --test "tests/unit/*.test.ts"
 ```
 
 **End-to-end tests** use Playwright against a **staging** Supabase project (never production).

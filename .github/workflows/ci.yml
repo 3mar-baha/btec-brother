@@ -46,4 +46,4 @@ jobs:
 
       # Node 22+ runs the TypeScript suites directly (native type stripping).
       - name: Unit tests
-        run: node --test tests/unit/
+        run: node --test "tests/unit/*.test.ts"
