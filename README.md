@@ -1,246 +1,99 @@
-<div dir="rtl" align="center">
+<div align="center">
 
-# BTEC Brother · بيتك براذر
+# BTEC Brother
 
-**منصة لإدارة طلبات ومهام BTEC — تربط الوسطاء والعاملين والإدارة في سير عمل واحد.**
+**Academic Project & Task Operations Platform**
+نظام إدارة وتشغيل مشاريع BTEC
+
+[![CI](https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml/badge.svg)](https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml)
 
 </div>
 
-<p align="center">
-  <a href="https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml">
-    <img src="https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml/badge.svg" alt="CI">
-  </a>
-</p>
-
-<p align="center">
-  <a href="#features">Features</a> ·
-  <a href="#roles--workflow">Roles</a> ·
-  <a href="#tech-stack">Tech Stack</a> ·
-  <a href="#getting-started">Getting Started</a> ·
-  <a href="#environment-variables">Env Vars</a> ·
-  <a href="#database">Database</a> ·
-  <a href="#testing">Testing</a> ·
-  <a href="#deployment">Deployment</a> ·
-  <a href="#license">License</a>
-</p>
-
----
-
 ## Overview
 
-**BTEC Brother** is a full-stack platform for managing BTEC assignment orders. Brokers
-(`وسيط`) create orders on behalf of clients, workers (`عامل`) claim tasks from the
-open pool and log daily progress, and admins (`مدير`) oversee the whole operation —
-approving new accounts, monitoring activity, and settling payouts.
+**BTEC Brother** is an internal, Arabic-first (RTL) operations platform for a
+team producing Pearson BTEC coursework. Brokers register client orders and
+publish them to an open task pool; workers claim one task at a time, log
+daily progress, and submit deliverables with Turnitin/AI scores; admins
+oversee accounts, finances, and analytics — with an automatic 80/20 revenue
+split and one-click payout settlement.
 
-The app is fully Arabic (RTL), production-hosted on Vercel, and backed by Supabase
-(PostgreSQL + Auth + Row Level Security + Realtime).
+**Stack:** Next.js 14 (App Router, RSC) · TypeScript (strict) · Tailwind CSS
++ shadcn/ui · Supabase (PostgreSQL 15, Auth, RLS, Realtime, Storage) ·
+Telegram Bot notifications · Vercel Cron · Playwright + Node test runner.
 
-## Features
+## Value Proposition
 
-- **Email/password & Telegram authentication** — sign up, verify, and link a Telegram account for notifications.
-- **Approval workflow** — new accounts land on a pending-approval page until an admin approves them.
-- **Open-pool order market** — brokers publish orders; workers claim one active task at a time.
-- **Clients CRM** (`/clients`, admin + broker only) — client directory aggregated from orders with
-  composable multi-criteria filters (grade, criteria level, school, specialisation, broker, activity
-  status), omni-search, four sort keys, URL-synced filter state, per-client order-history drawer,
-  WhatsApp quick actions, and one-click order prefill.
-- **Daily task updates** — workers post progress notes against their in-progress order.
-- **Team directory** — public member listing with earnings (admins are excluded from stats).
-- **Activity logs** — full audit trail of order and payment actions.
-- **Automatic revenue split** — 80/20 worker/broker split generated on order completion.
-- **Admin settlement** — admins settle pending payouts; worker balances reflect settled amounts.
-- **Realtime balance** — the header wallet refreshes on navigation and via realtime events.
-- **Role-based UI** — create-order, admin, and settlement controls appear only for authorized roles.
+- **One workflow, zero side-channels** — every order, revision, and payout
+  lives in one auditable system.
+- **Clients CRM built in** — aggregated client directory with composable
+  filters, duplicate detection at entry, internal notes, WhatsApp quick
+  actions, and CSV export.
+- **Money handled by the database** — atomic 80/20 payout generation and
+  row-locked settlement; balances are always visible.
+- **Deadlines defended automatically** — Telegram reminders at 24h and 6h
+  before every in-progress deadline.
+- **PII by design** — workers never receive client contact data; guards live
+  in RLS and Server Components, not in hidden buttons.
 
-## Roles & Workflow
-
-| Role            | Arabic    | Capabilities                                                                 |
-| --------------- | --------- | ---------------------------------------------------------------------------- |
-| **Admin**       | مدير      | Approves users, edits profiles, promotes roles, monitors logs, settles payouts |
-| **Broker**      | وسيط      | Creates orders, manages the clients CRM, approves submission → completion     |
-| **Worker**      | عامل      | Claims tasks from the open pool, posts daily updates, submits completed work  |
-
-```
-broker creates order  →  worker claims (open pool)  →  worker posts daily updates
-      →  broker marks completed  →  80/20 payouts generated (pending)
-      →  admin settles payouts  →  worker sees balance in header + profile
-```
-
-## Tech Stack
-
-| Layer        | Technology                                                              |
-| ------------ | ----------------------------------------------------------------------- |
-| Framework    | [Next.js 14](https://nextjs.org) (App Router, RSC)                       |
-| Language     | TypeScript                                                               |
-| Styling      | [Tailwind CSS v3](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) (Radix) |
-| Backend      | [Supabase](https://supabase.com) — Postgres, Auth, RLS, Realtime, RPC    |
-| Data fetching| Supabase JS client (React Server Components + client components)         |
-| Animation    | Anime.js                                                                 |
-| Testing      | [Playwright](https://playwright.dev) (E2E) + Node test runner (unit)     |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js ≥ 18.17 (Node 20+ recommended)
-- npm
-- A [Supabase](https://supabase.com) project
-
-### Installation
+## Quick Start
 
 ```bash
 git clone https://github.com/3mar-baha/betc-brother.git
 cd betc-brother
 npm install
+cp .env.example .env.local   # fill in Supabase + Telegram values
+npm run dev                  # http://localhost:3000
 ```
 
-### Environment variables
+Database setup: run `supabase/schema.sql` then `supabase/seed.sql` in your
+Supabase SQL Editor, then apply any pending files from
+`supabase/migrations/` (manual, staging first). Full guide:
+[docs/13-DEPLOYMENT.md](docs/13-DEPLOYMENT.md).
 
-Copy the template and fill in your values:
+## Architecture
 
-```bash
-cp .env.example .env.local
+```
+Next.js (RSC + middleware guards) ── Supabase (RLS + RPC workflows)
+        │                                   │
+        ├── Telegram Bot (webhook + DMs)     ├── Realtime (orders)
+        └── Vercel Cron (hourly reminders)   └── Storage (attachments)
 ```
 
-See [Environment variables](#environment-variables) for the full list.
-
-### Database setup
-
-1. Open your Supabase project's **SQL Editor**.
-2. Run the schema and seed files in order:
-   - `supabase/schema.sql` — tables, enums, RLS policies, triggers, RPC functions.
-   - `supabase/seed.sql` — reference data (specialisations, grade levels, criteria levels).
-3. Apply any pending migration files in `supabase/migrations/` (each targets a specific change).
-
-> **Note:** schema and migrations are applied manually in the SQL Editor; the app has
-> no automated migration runner.
-
-### Run
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Environment Variables
-
-| Variable                          | Description                                        |
-| --------------------------------- | -------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`        | Supabase project URL (baked at build time)         |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase anon/public key (baked at build time)     |
-| `SUPABASE_SERVICE_ROLE_KEY`       | Service-role key (server-side only, never exposed) |
-| `TELEGRAM_BOT_TOKEN`              | Telegram bot token (server-side)                   |
-| `TELEGRAM_CHAT_ID`                | Telegram chat ID for admin notifications           |
-| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | Telegram bot username (baked at build time)      |
-| `NEXT_PUBLIC_TELEGRAM_BOT_ID`     | Telegram bot ID (baked at build time)              |
-
-> Variables prefixed `NEXT_PUBLIC_` are inlined at build time — changing them requires
-> a redeploy. Keep `SUPABASE_SERVICE_ROLE_KEY` and `TELEGRAM_BOT_TOKEN` out of any
-> client bundle and never commit real values.
+| Doc | Contents |
+| --- | -------- |
+| [01-PRODUCT-REQUIREMENTS](docs/01-PRODUCT-REQUIREMENTS.md) | PRD, personas, goals |
+| [02-PRODUCT-SPECIFICATION](docs/02-PRODUCT-SPECIFICATION.md) | Workflows, state machine, edge cases, CRM |
+| [03-TECHNICAL-SPECIFICATION](docs/03-TECHNICAL-SPECIFICATION.md) | Stack, performance, constraints |
+| [04-ARCHITECTURE](docs/04-ARCHITECTURE.md) | System design, components, data flow |
+| [05-DATA-MODEL](docs/05-DATA-MODEL.md) | Schemas, RLS policies, RPC contracts |
+| [06-API-SPECIFICATION](docs/06-API-SPECIFICATION.md) | Route handlers + RPC API |
+| [07-IMPLEMENTATION-PLAN](docs/07-IMPLEMENTATION-PLAN.md) | Phases & acceptance criteria |
+| [10-CHECKPOINT](docs/10-CHECKPOINT.md) | Current live state |
+| [11-TESTING](docs/11-TESTING.md) | E2E/unit suites, regression gates |
+| [12-SECURITY](docs/12-SECURITY.md) | Threat model, RLS guards, audit history |
+| [13-DEPLOYMENT](docs/13-DEPLOYMENT.md) | Vercel, cron, Supabase setup |
+| [CHANGELOG](CHANGELOG.md) | Release history |
+| [CONTRIBUTING](CONTRIBUTING.md) | Workflow & conventions |
 
 ## Testing
 
-**Unit tests** cover the clients-CRM aggregation/filter/sort logic — no environment needed:
-
 ```bash
-node --test "tests/unit/*.test.ts"
+node --test "tests/unit/*.test.ts"   # unit — no environment needed
+npm run test:e2e                     # Playwright, staging only (.env.staging)
 ```
 
-**End-to-end tests** use Playwright against a **staging** Supabase project (never production).
-
-```bash
-# 1. Create .env.staging with the same 7 variables pointing at the staging project
-#    (use .env.example as the template)
-
-# 2. Install Playwright browsers (first run only)
-npx playwright install
-
-# 3. Run the suite
-npm run test:e2e
-```
-
-E2E coverage: authentication, role-based access control (including the clients CRM guards),
-the clients directory (stats, aggregation, all eight filters, sorting, history drawer,
-order-form prefill), the team directory, daily task updates, and header balance correctness.
-The clients spec seeds deterministic fixtures on staging and deletes them after the run.
-
-## Deployment
-
-The project is deployed on [Vercel](https://vercel.com) (`fra1` region). Pushing to the
-`main` branch triggers a production deployment automatically.
-
-1. Import the repo into Vercel.
-2. Set all seven environment variables (see above) in the Vercel project settings.
-3. Deploy — the framework (Next.js) is auto-detected.
-
-## Project Structure
-
-```
-src/
-  app/                    # App Router pages + API route handlers
-    (auth)/login/         # login page
-    (dashboard)/          # market, workspace, clients, directory, profile, logs, admin, settings
-    api/                  # auth (register, telegram), telegram webhook
-    pending-approval/     # post-signup approval screen
-  components/             # feature components (dashboard, market, workspace, clients, admin…)
-  lib/                    # Supabase clients, helpers, utils
-  hooks/                  # shared React hooks
-supabase/
-  schema.sql              # full schema (tables, enums, RLS, RPC)
-  seed.sql                # reference data
-  setup.sql               # consolidated schema + seed
-  migrations/             # incremental SQL migrations
-tests/
-  e2e/                    # Playwright specs + helpers
-  unit/                   # node --test unit suites (clients aggregation logic)
-```
+24 E2E tests cover auth, role-based access control, the clients CRM
+end-to-end, marketplace pagination/filtering, the full revision loop, and
+the payout settlement flow. See [docs/11-TESTING.md](docs/11-TESTING.md).
 
 ## Security
 
-- Row Level Security (RLS) enforced on all tables; client access is scoped per role.
-- Service-role key is used **only** in server code (route handlers, migrations, tests).
-- `.env*` files, `recovery-codes.txt`, and `.mcp.json` are gitignored.
-- See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+Row Level Security on every table; state transitions only through guarded
+Postgres RPCs; client PII restricted to staff queries; cron endpoints
+bearer-protected. Report vulnerabilities per
+[SECURITY.md](SECURITY.md) — never in public issues.
 
 ## License
 
 Proprietary — all rights reserved. See [LICENSE](LICENSE).
-
----
-
-<div dir="rtl">
-
-## نبذة
-
-**بيتك براذر** منصة متكاملة لإدارة طلبات ومهام BTEC. الوسطاء ينشئون الطلبات نيابةً عن
-العملاء، والعاملون يستلمون المهام من السوق المفتوح ويسجّلون التقدّم اليومي، والمدير
-يشرف على العملية كاملة: اعتماد الحسابات، متابعة النشاط، وتسوية المدفوعات.
-
-التطبيق بالكامل باللغة العربية (RTL)، مستضاف على Vercel، ومدعوم بـ Supabase.
-
-## الأدوار
-
-- **المدير** — يعتمد الحسابات، يعدّل الملفات، يرقي الأدوار، يسوّي المدفوعات.
-- **الوسيط** — ينشئ الطلبات، يتابعها، ويعتمد الإنجاز (يولّد دفعات 80/20).
-- **العامل** — يستلم مهمة واحدة نشطة، يسجّل التحديثات اليومية، ويسلّم العمل.
-
-## التثبيت والتشغيل
-
-```bash
-git clone https://github.com/3mar-baha/betc-brother.git
-cd betc-brother
-npm install
-cp .env.example .env.local   # ثم عبّئ القيم
-npm run dev
-```
-
-طالع الأقسام أعلاه للحصول على تفاصيل متغيّرات البيئة، وإعداد قاعدة البيانات،
-والاختبارات، والنشر.
-
-## الترخيص
-
-حقوق الملكية محفوظة — راجع [LICENSE](LICENSE).
-
-</div>
