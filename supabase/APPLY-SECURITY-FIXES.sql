@@ -569,9 +569,9 @@ from auth.users
 where crypt('Password123!', encrypted_password) = encrypted_password;
 
 -- ج) صحة سياسات orders الجديدة (يجب أن ترجع TO authenticated):
-select policy_name, roles
+select policyname, roles
 from pg_policies
-where schemaname = 'public' and tablename = 'orders' and policy_name = 'orders_select';
+where schemaname = 'public' and tablename = 'orders' and policyname = 'orders_select';
 
 -- ============================================================================
 -- قالب تدوير كلمة المرور — لكل حساب ظهر في القائمة (ب)، انسخ السطر،
