@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to BTEC Hub are documented here.
+All notable changes to BETC Brother are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com); dates are `YYYY-MM-DD`.
 
 ## [2026-08-24]

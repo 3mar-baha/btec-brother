@@ -1,12 +1,12 @@
 # Contributing
 
-Thanks for contributing to BTEC Hub. Keep it small, correct, and tested.
+Thanks for contributing to BETC Brother. Keep it small, correct, and tested.
 
 ## Setup
 
 ```bash
-git clone https://github.com/3mar-baha/btec-hub.git
-cd btec-hub
+git clone https://github.com/3mar-baha/betc-brother.git
+cd betc-brother
 npm install
 cp .env.example .env.local   # fill in your Supabase + Telegram values
 npm run dev

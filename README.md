@@ -7,8 +7,8 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/3mar-baha/btec-hub/actions/workflows/ci.yml">
-    <img src="https://github.com/3mar-baha/btec-hub/actions/workflows/ci.yml/badge.svg" alt="CI">
+  <a href="https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml">
+    <img src="https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
 </p>
 
@@ -90,8 +90,8 @@ broker creates order  →  worker claims (open pool)  →  worker posts daily up
 ### Installation
 
 ```bash
-git clone https://github.com/3mar-baha/btec-hub.git
-cd btec-hub
+git clone https://github.com/3mar-baha/betc-brother.git
+cd betc-brother
 npm install
 ```
 
@@ -229,8 +229,8 @@ Proprietary — all rights reserved. See [LICENSE](LICENSE).
 ## التثبيت والتشغيل
 
 ```bash
-git clone https://github.com/3mar-baha/btec-hub.git
-cd btec-hub
+git clone https://github.com/3mar-baha/betc-brother.git
+cd betc-brother
 npm install
 cp .env.example .env.local   # ثم عبّئ القيم
 npm run dev

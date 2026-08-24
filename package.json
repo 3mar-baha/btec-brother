@@ -1,12 +1,12 @@
 {
-  "name": "btec-hub",
+  "name": "betc-brother",
   "version": "0.1.0",
   "private": true,
   "description": "منصة لإدارة طلبات ومهام BTEC — تربط الوسطاء والعاملين والإدارة في سير عمل واحد.",
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/3mar-baha/btec-hub.git"
+    "url": "https://github.com/3mar-baha/betc-brother.git"
   },
   "engines": {
     "node": ">=18.17.0"
