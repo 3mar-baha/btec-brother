@@ -70,7 +70,19 @@ end $$;
 
 -- ---------------------------------------------------------------------------
 -- 1+2) Workflow RPCs: approval guard + payout row locks
+--
+-- Drop first: CREATE OR REPLACE cannot rename parameters, and production
+-- drifted (request_revision's 2nd arg is 'p_notes' there while the app calls
+-- 'p_revision_notes'). Drops match by TYPES, not names, so this clears any
+-- name-drifted variant. Recreating also resets its privileges — the grant
+-- block after the last function restores them.
 -- ---------------------------------------------------------------------------
+drop function if exists public.claim_order(uuid);
+drop function if exists public.drop_order(uuid, text);
+drop function if exists public.submit_order_solution(uuid, text, numeric, numeric);
+drop function if exists public.request_revision(uuid, text);
+drop function if exists public.approve_and_complete_order(uuid);
+drop function if exists public.settle_payout(uuid, text);
 
 -- claim_order: worker claims an open order from the market.
 create or replace function public.claim_order(p_order_id uuid)
@@ -423,6 +435,21 @@ begin
   );
 end;
 $$;
+
+-- Restore per-function privileges (schema.sql convention): the recreate above
+-- reset them, so re-grant explicitly — authenticated + service_role only.
+revoke all on function public.claim_order(uuid) from public;
+grant execute on function public.claim_order(uuid) to authenticated, service_role;
+revoke all on function public.drop_order(uuid, text) from public;
+grant execute on function public.drop_order(uuid, text) to authenticated, service_role;
+revoke all on function public.submit_order_solution(uuid, text, numeric, numeric) from public;
+grant execute on function public.submit_order_solution(uuid, text, numeric, numeric) to authenticated, service_role;
+revoke all on function public.request_revision(uuid, text) from public;
+grant execute on function public.request_revision(uuid, text) to authenticated, service_role;
+revoke all on function public.approve_and_complete_order(uuid) from public;
+grant execute on function public.approve_and_complete_order(uuid) to authenticated, service_role;
+revoke all on function public.settle_payout(uuid, text) from public;
+grant execute on function public.settle_payout(uuid, text) to authenticated, service_role;
 
 -- ---------------------------------------------------------------------------
 -- 3) orders_select: signed-in members only (was implicitly public to anon)
