@@ -5,6 +5,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com); dates are
 
 ## [2026-08-24]
 
+### Changed
+- **Rebranded platform logo** to the new BETC Brother identity: header lockup
+  (`logo-light.png` / `logo-dark.png`, shared across light/dark themes) and all app icons
+  (`favicon.ico`, `icon-192/512`, `apple-icon`) regenerated from the new artwork with the
+  background removed for transparency.
+
 ### Added
 - **Clients CRM screen** (`/clients`, admin + broker only): client directory aggregated from
   orders (grouped by normalized phone) with stat cards, desktop table + mobile cards, and a

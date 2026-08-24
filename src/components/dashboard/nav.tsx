@@ -104,16 +104,16 @@ export function DashboardNav({ user }: { user: NavUser }) {
           <Image
             src="/logo-light.png"
             alt="BTEC Hub"
-            width={958}
-            height={212}
+            width={1168}
+            height={446}
             priority
             className="h-9 w-auto object-contain dark:hidden"
           />
           <Image
             src="/logo-dark.png"
             alt="BTEC Hub"
-            width={958}
-            height={212}
+            width={1168}
+            height={446}
             priority
             className="hidden h-9 w-auto object-contain dark:block"
           />
