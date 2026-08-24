@@ -59,8 +59,9 @@ export function WorkerWorkspace({
     return (id: number) => map.get(id);
   }, [criteriaLevels]);
 
-  async function handleAddUpdate(note: string) {
-    if (!activeTask) return;
+  // Returns success so ActiveTaskCard keeps the typed note when the insert fails.
+  async function handleAddUpdate(note: string): Promise<boolean> {
+    if (!activeTask) return false;
     setAddingUpdate(true);
 
     const {
@@ -80,7 +81,7 @@ export function WorkerWorkspace({
         description: error.message,
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (user) {
@@ -94,6 +95,7 @@ export function WorkerWorkspace({
 
     toast({ title: "تمت إضافة التحديث" });
     router.refresh();
+    return true;
   }
 
   return (

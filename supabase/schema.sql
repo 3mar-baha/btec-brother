@@ -290,6 +290,13 @@ begin
     raise exception 'حسابك غير مسجل في المنصة' using errcode = 'P0001';
   end if;
 
+  if not exists (
+    select 1 from public.users
+    where id = v_user_id and is_approved and is_active
+  ) then
+    raise exception 'حسابك غير مُعتمد أو موقوف حالياً' using errcode = 'P0001';
+  end if;
+
   if v_role <> 'worker' then
     raise exception 'فقط العمال يمكنهم حجز المهام من السوق' using errcode = 'P0001';
   end if;
@@ -344,6 +351,13 @@ begin
     raise exception 'حسابك غير مسجل في المنصة' using errcode = 'P0001';
   end if;
 
+  if not exists (
+    select 1 from public.users
+    where id = v_user_id and is_approved and is_active
+  ) then
+    raise exception 'حسابك غير مُعتمد أو موقوف حالياً' using errcode = 'P0001';
+  end if;
+
   select worker_id into v_worker_id from public.orders where id = p_order_id;
 
   if v_worker_id is null then
@@ -392,6 +406,13 @@ declare
   v_worker_id uuid;
   v_status    public.order_status;
 begin
+  if not exists (
+    select 1 from public.users
+    where id = v_user_id and is_approved and is_active
+  ) then
+    raise exception 'حسابك غير مُعتمد أو موقوف حالياً' using errcode = 'P0001';
+  end if;
+
   select worker_id, status into v_worker_id, v_status
   from public.orders where id = p_order_id;
 
@@ -456,6 +477,13 @@ begin
     raise exception 'حسابك غير مسجل في المنصة' using errcode = 'P0001';
   end if;
 
+  if not exists (
+    select 1 from public.users
+    where id = v_user_id and is_approved and is_active
+  ) then
+    raise exception 'حسابك غير مُعتمد أو موقوف حالياً' using errcode = 'P0001';
+  end if;
+
   select broker_id, status into v_broker_id, v_status
   from public.orders where id = p_order_id;
 
@@ -512,9 +540,16 @@ begin
     raise exception 'حسابك غير مسجل في المنصة' using errcode = 'P0001';
   end if;
 
+  if not exists (
+    select 1 from public.users
+    where id = v_user_id and is_approved and is_active
+  ) then
+    raise exception 'حسابك غير مُعتمد أو موقوف حالياً' using errcode = 'P0001';
+  end if;
+
   select broker_id, worker_id, status, total_price
     into v_broker_id, v_worker_id, v_status, v_total
-  from public.orders where id = p_order_id;
+  from public.orders where id = p_order_id for update;
 
   if v_role <> 'admin' and v_broker_id <> v_user_id then
     raise exception 'لا تملك صلاحية اعتماد هذه المهمة' using errcode = 'P0001';
@@ -575,6 +610,12 @@ begin
   if v_role <> 'admin' then
     raise exception 'فقط المدير يمكنه تسوية المدفوعات' using errcode = 'P0001';
   end if;
+
+  -- Lock the pending rows first: FOR UPDATE cannot sit on an aggregate query.
+  perform 1
+    from public.payouts
+   where user_id = p_user_id and status = 'pending'
+     for update;
 
   select count(*), coalesce(sum(amount), 0)
     into v_count, v_total
@@ -796,7 +837,8 @@ alter table public.orders enable row level security;
 -- client_name / client_phone / client_school are hidden from workers at the query layer.
 drop policy if exists "orders_select" on public.orders;
 create policy "orders_select" on public.orders
-  for select using (
+  for select to authenticated
+  using (
     status = 'open'
     or broker_id = auth.uid()
     or worker_id = auth.uid()
@@ -818,6 +860,10 @@ create policy "orders_update" on public.orders
 drop policy if exists "orders_delete" on public.orders;
 create policy "orders_delete" on public.orders
   for delete using (public.is_admin());
+
+-- All order mutations must go through the SECURITY DEFINER RPCs; direct
+-- table updates from client roles would bypass the workflow state machine.
+revoke update on public.orders from anon, authenticated;
 
 -- order_attachments ----------------------------------------------------------
 alter table public.order_attachments enable row level security;
@@ -876,7 +922,13 @@ create policy "activity_logs_select" on public.activity_logs
 
 drop policy if exists "activity_logs_insert" on public.activity_logs;
 create policy "activity_logs_insert" on public.activity_logs
-  for insert with check (actor_id = auth.uid());
+  for insert with check (
+    actor_id = auth.uid()
+    and exists (
+      select 1 from public.orders o
+      where o.id = order_id and (o.broker_id = auth.uid() or o.worker_id = auth.uid())
+    )
+  );
 
 -- reviews --------------------------------------------------------------------
 alter table public.reviews enable row level security;

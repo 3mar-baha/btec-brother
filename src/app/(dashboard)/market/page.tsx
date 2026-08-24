@@ -16,7 +16,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const ORDER_COLUMNS =
-  "id, order_number, title, unit_title, assignment_name, specialisation_id, grade_id, criteria_id, total_price, worker_share, deadline, status, created_at";
+  "id, order_number, broker_id, title, unit_title, assignment_name, specialisation_id, grade_id, criteria_id, total_price, worker_share, deadline, status, created_at";
 
 export default async function MarketPage() {
   const supabase = await createClient();

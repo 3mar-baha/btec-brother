@@ -32,7 +32,7 @@ interface ActiveTaskCardProps {
   attachments: Attachment[];
   updates: DailyUpdate[];
   addingUpdate: boolean;
-  onAddUpdate: (note: string) => Promise<void>;
+  onAddUpdate: (note: string) => Promise<boolean>;
   onOpenSubmit: () => void;
   onOpenDrop: () => void;
 }
@@ -68,8 +68,9 @@ export function ActiveTaskCard({
     e.preventDefault();
     const text = note.trim();
     if (!text) return;
-    setNote("");
-    await onAddUpdate(text);
+    const ok = await onAddUpdate(text);
+    // Clear only on success so a failed insert never loses the typed note.
+    if (ok) setNote("");
   }
 
   return (

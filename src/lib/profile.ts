@@ -49,6 +49,12 @@ export async function loadProfileData(
 ): Promise<ProfileData | null> {
   const supabase = await createClient();
 
+  // userId comes from the URL (/profile/[id]) — validate it before it is
+  // interpolated into PostgREST .or() filter strings.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    return null;
+  }
+
   const { data: member } = await supabase
     .from("users")
     .select(

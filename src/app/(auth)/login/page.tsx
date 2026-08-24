@@ -25,6 +25,12 @@ const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function translateAuthError(message: string): string {
+  if (message === "email_exists") {
+    return "هذا البريد الإلكتروني مسجل مسبقاً";
+  }
+  if (message === "signup_failed" || message === "invalid_fields") {
+    return "تعذر إنشاء الحساب، تحقق من البيانات وحاول مرة أخرى";
+  }
   if (/invalid login credentials/i.test(message)) {
     return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
   }
@@ -218,37 +224,46 @@ export default function LoginPage() {
     }
 
     setSignupLoading(true);
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: signupEmail.trim(),
-        password: signupPassword,
-        full_name: full_name.trim(),
-        phone_number: phone_number.trim(),
-        requested_role: signup.requested_role,
-      }),
-    });
-    const json = await res.json().catch(() => null);
-    setSignupLoading(false);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: signupEmail.trim(),
+          password: signupPassword,
+          full_name: full_name.trim(),
+          phone_number: phone_number.trim(),
+          requested_role: signup.requested_role,
+        }),
+      });
+      const json = await res.json().catch(() => null);
 
-    if (!res.ok || !json?.success) {
+      if (!res.ok || !json?.success) {
+        toast({
+          title: "تعذر إنشاء الحساب",
+          description: translateAuthError(
+            typeof json?.error === "string" ? json.error : "حدث خطأ غير متوقع"
+          ),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "تم إنشاء الحساب",
+        description: "حسابك قيد المراجعة بانتظار موافقة المدير",
+      });
+      router.push(json.redirect ?? "/pending-approval");
+      router.refresh();
+    } catch {
       toast({
         title: "تعذر إنشاء الحساب",
-        description: translateAuthError(
-          typeof json?.error === "string" ? json.error : "حدث خطأ غير متوقع"
-        ),
+        description: "تعذر الاتصال بالخادم، تحقق من اتصالك وحاول مجدداً.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setSignupLoading(false);
     }
-
-    toast({
-      title: "تم إنشاء الحساب",
-      description: "حسابك قيد المراجعة بانتظار موافقة المدير",
-    });
-    router.push(json.redirect ?? "/pending-approval");
-    router.refresh();
   }
 
   return (

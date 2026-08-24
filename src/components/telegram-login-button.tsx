@@ -47,7 +47,12 @@ export function TelegramLoginButton({
     script.setAttribute("data-request-access", "write");
     script.onerror = () => setWidgetError(true);
 
-    container.appendChild(script);
+    // Guard against StrictMode double-mount rendering two widgets.
+    container.replaceChildren(script);
+
+    return () => {
+      script.remove();
+    };
   }, [authUrl]);
 
   function manualLogin() {

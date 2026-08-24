@@ -190,13 +190,17 @@ export function CreateOrderModal({
       )} - ${escapeHtml(criteria)} - نصيب العامل: ${formatMoney(price * 0.8)} د.أ`
     );
 
+    const failedUploads: string[] = [];
     for (const file of files) {
       const path = `${order.id}/${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("order-attachments")
         .upload(path, file);
 
-      if (uploadError) continue;
+      if (uploadError) {
+        failedUploads.push(file.name);
+        continue;
+      }
 
       const url = supabase.storage
         .from("order-attachments")
@@ -212,7 +216,9 @@ export function CreateOrderModal({
 
     toast({
       title: "تم إنشاء الطلب",
-      description: "تم نشر الطلب في السوق المفتوح",
+      description: failedUploads.length
+        ? `نُشر الطلب، لكن تعذر رفع المرفقات: ${failedUploads.join("، ")}`
+        : "تم نشر الطلب في السوق المفتوح",
     });
     reset();
     setSubmitting(false);
@@ -411,6 +417,7 @@ export function CreateOrderModal({
             <Button
               type="button"
               variant="outline"
+              disabled={submitting}
               onClick={() => onOpenChange(false)}
             >
               إلغاء

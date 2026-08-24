@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 
 import { createServiceClient } from "@/lib/supabase/service";
@@ -33,7 +33,12 @@ function webhookSecret(): string {
  */
 export async function POST(request: Request) {
   const provided = request.headers.get("x-telegram-bot-api-secret-token");
-  if (!provided || provided !== webhookSecret()) {
+  const expected = webhookSecret();
+  if (
+    !provided ||
+    provided.length !== expected.length ||
+    !timingSafeEqual(Buffer.from(provided), Buffer.from(expected))
+  ) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 

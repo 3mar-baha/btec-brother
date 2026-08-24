@@ -56,21 +56,26 @@ export function SettingsPanel({
 
   async function handleUnlink() {
     setUnlinking(true);
-    const res = await fetch("/api/auth/telegram/unlink", { method: "POST" });
-    setUnlinking(false);
+    try {
+      const res = await fetch("/api/auth/telegram/unlink", { method: "POST" });
 
-    if (res.ok) {
-      toast({
-        title: "تم إلغاء الربط",
-        description: "تم إلغاء ربط حساب Telegram.",
-      });
-      router.refresh();
-    } else {
+      if (res.ok) {
+        toast({
+          title: "تم إلغاء الربط",
+          description: "تم إلغاء ربط حساب Telegram.",
+        });
+        router.refresh();
+      } else {
+        throw new Error("unlink failed");
+      }
+    } catch {
       toast({
         title: "تعذر إلغاء الربط",
         description: "حدث خطأ، حاول مجدداً.",
         variant: "destructive",
       });
+    } finally {
+      setUnlinking(false);
     }
   }
 

@@ -57,13 +57,22 @@ export function MarketClient({
   const [createOpen, setCreateOpen] = useState(false);
 
   const loadOrders = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("orders")
       .select(ORDER_COLUMNS)
       .eq("status", "open")
       .order("created_at", { ascending: false });
-    setOrders((data ?? []) as MarketOrder[]);
-  }, [supabase]);
+    if (error) {
+      // Keep the current list on a failed refresh (e.g. transient network
+      // issue from the realtime handler) instead of wiping the market.
+      toast({
+        title: "تعذر تحديث قائمة الطلبات",
+        variant: "destructive",
+      });
+      return;
+    }
+    setOrders(data as MarketOrder[]);
+  }, [supabase, toast]);
 
   useEffect(() => {
     const channel = supabase

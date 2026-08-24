@@ -22,12 +22,12 @@ export function HeaderBalance({
     const supabase = createClient();
 
     async function refresh() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("payouts")
         .select("amount, status")
         .eq("user_id", userId);
-      if (!mounted) return;
-      const settled = (data ?? [])
+      if (!mounted || error) return; // keep last known balance on failure
+      const settled = data
         .filter((p) => p.status === "settled")
         .reduce((sum, p) => sum + Number(p.amount), 0);
       setBalance(settled);

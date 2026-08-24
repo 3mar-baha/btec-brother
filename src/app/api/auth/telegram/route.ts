@@ -12,12 +12,13 @@ function telegramEmail(id: string): string {
 /**
  * Deterministic password for a Telegram user. Derived server-side from the
  * service-role key so it is never stored and can be recomputed on every login.
+ * Returns null when no secret is configured — falling back to a constant
+ * would make these passwords guessable.
  */
-function telegramPassword(id: string): string {
+function telegramPassword(id: string): string | null {
   const secret =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.TELEGRAM_BOT_TOKEN ??
-    "btec-hub";
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.TELEGRAM_BOT_TOKEN;
+  if (!secret) return null;
   return createHash("sha256").update(`telegram:${id}:${secret}`).digest("hex");
 }
 
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
 
   const email = telegramEmail(id);
   const password = telegramPassword(id);
+  if (!password) return redirectWithError(request);
   const fullName =
     [payload.first_name, payload.last_name].filter(Boolean).join(" ") ||
     payload.username ||
