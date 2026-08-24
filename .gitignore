@@ -41,3 +41,4 @@ next-env.d.ts
 !.env.example
 recovery-codes.txt
 .mcp.json
+supabase/.temp/
