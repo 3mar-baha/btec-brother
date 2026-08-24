@@ -23,7 +23,7 @@ export function CollaborationMatrix({
         <div className="mt-4 flex flex-col gap-2">
           {collaboration.map((c) => (
             <div
-              key={c.peer_name}
+              key={c.peer_id}
               className="flex items-center justify-between rounded-lg bg-bone/60 px-3 py-2"
             >
               <span className="text-sm text-ink">{c.peer_name}</span>

@@ -51,7 +51,7 @@ export function CategoriesManager({
   async function add(
     table: "specialisations" | "grade_levels",
     name: string
-  ) {
+  ): Promise<boolean> {
     const { error } = await supabase.from(table).insert({ name });
     if (error) {
       toast({
@@ -59,13 +59,14 @@ export function CategoriesManager({
         description: error.message,
         variant: "destructive",
       });
-      return;
+      return false;
     }
     toast({ title: "تمت الإضافة" });
     router.refresh();
+    return true;
   }
 
-  async function addCriteria(code: string, name: string) {
+  async function addCriteria(code: string, name: string): Promise<boolean> {
     const { error } = await supabase
       .from("criteria_levels")
       .insert({ code, name });
@@ -75,10 +76,11 @@ export function CategoriesManager({
         description: error.message,
         variant: "destructive",
       });
-      return;
+      return false;
     }
     toast({ title: "تمت الإضافة" });
     router.refresh();
+    return true;
   }
 
   return (
@@ -101,7 +103,7 @@ export function CategoriesManager({
         withCode
         onAdd={(name, code) => {
           if (code) return addCriteria(code, name);
-          return Promise.resolve();
+          return Promise.resolve(true); // unreachable: the form requires a code
         }}
         onToggle={(item) => toggle("criteria_levels", item)}
       />
@@ -113,7 +115,7 @@ interface CategoryColumnProps {
   title: string;
   items: Category[];
   withCode?: boolean;
-  onAdd: (name: string, code?: string) => Promise<void>;
+  onAdd: (name: string, code?: string) => Promise<boolean>;
   onToggle: (item: Category) => Promise<void>;
 }
 
@@ -136,10 +138,13 @@ function CategoryColumn({
     if (withCode && !code.trim()) return;
 
     setAdding(true);
-    await onAdd(trimmedName, withCode ? code.trim() : undefined);
+    const ok = await onAdd(trimmedName, withCode ? code.trim() : undefined);
     setAdding(false);
-    setName("");
-    setCode("");
+    // Keep the typed values when the insert fails so nothing is lost.
+    if (ok) {
+      setName("");
+      setCode("");
+    }
   }
 
   async function handleToggle(item: Category) {

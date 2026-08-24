@@ -12,6 +12,7 @@ export interface ProfileMember {
 }
 
 export interface CollaborationEntry {
+  peer_id: string;
   peer_name: string;
   count: number;
 }
@@ -117,6 +118,7 @@ export async function loadProfileData(
   }
   const collaboration = Array.from(collabMap.entries())
     .map(([peerId, count]) => ({
+      peer_id: peerId,
       peer_name: nameById.get(peerId) ?? "غير معروف",
       count,
     }))

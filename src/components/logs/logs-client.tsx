@@ -50,6 +50,9 @@ export function LogsClient({ initialLogs, users, orders }: LogsClientProps) {
   );
   const [actionFilter, setActionFilter] = useState("all");
   const [memberFilter, setMemberFilter] = useState("all");
+  // Dropdown source as state so actors discovered via realtime show up
+  // without a page refresh.
+  const [memberOptions, setMemberOptions] = useState<LogUser[]>(users);
 
   const usersRef = useRef(users);
   const ordersRef = useRef(orders);
@@ -70,7 +73,12 @@ export function LogsClient({ initialLogs, users, orders }: LogsClientProps) {
           .eq("id", log.actor_id)
           .single();
         actor = (data as LogUser | null) ?? null;
-        if (actor) usersRef.current = [...usersRef.current, actor];
+        if (actor) {
+          usersRef.current = [...usersRef.current, actor];
+          setMemberOptions((prev) =>
+            prev.some((u) => u.id === actor!.id) ? prev : [...prev, actor!]
+          );
+        }
       }
 
       let orderNumber: number | null = null;
@@ -152,7 +160,7 @@ export function LogsClient({ initialLogs, users, orders }: LogsClientProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">كل الأعضاء</SelectItem>
-              {users.map((u) => (
+              {memberOptions.map((u) => (
                 <SelectItem key={u.id} value={u.id}>
                   {u.full_name}
                 </SelectItem>

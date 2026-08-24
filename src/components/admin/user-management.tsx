@@ -72,6 +72,7 @@ export function UserManagement({ users }: UserManagementProps) {
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editRole, setEditRole] = useState<"admin" | "broker" | "worker">("worker");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const pending = users.filter((u) => !u.is_approved && u.is_active);
 
@@ -152,32 +153,37 @@ export function UserManagement({ users }: UserManagementProps) {
   }
 
   async function saveEdit() {
-    if (!editUser) return;
+    if (!editUser || savingEdit) return;
     if (!editName.trim()) {
       toast({ title: "الاسم مطلوب", variant: "destructive" });
       return;
     }
 
-    const { error } = await supabase
-      .from("users")
-      .update({
-        full_name: editName.trim(),
-        phone_number: editPhone.trim() || null,
-        role: editRole,
-      })
-      .eq("id", editUser.id);
+    setSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({
+          full_name: editName.trim(),
+          phone_number: editPhone.trim() || null,
+          role: editRole,
+        })
+        .eq("id", editUser.id);
 
-    if (error) {
-      toast({
-        title: "تعذر التحديث",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
+      if (error) {
+        toast({
+          title: "تعذر التحديث",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({ title: "تم تحديث بيانات العضو" });
+      setEditUser(null);
+      router.refresh();
+    } finally {
+      setSavingEdit(false);
     }
-    toast({ title: "تم تحديث بيانات العضو" });
-    setEditUser(null);
-    router.refresh();
   }
 
   return (
@@ -424,10 +430,12 @@ export function UserManagement({ users }: UserManagementProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditUser(null)}>
+            <Button variant="outline" disabled={savingEdit} onClick={() => setEditUser(null)}>
               إلغاء
             </Button>
-            <Button onClick={saveEdit}>حفظ</Button>
+            <Button disabled={savingEdit} onClick={saveEdit}>
+              {savingEdit ? "جارٍ الحفظ…" : "حفظ"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
