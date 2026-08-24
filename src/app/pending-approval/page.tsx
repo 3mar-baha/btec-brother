@@ -22,17 +22,17 @@ export default async function PendingApprovalPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-canvas px-4 py-10">
       <Image
         src="/logo-light.png"
-        alt="BTEC Hub"
-        width={958}
-        height={212}
+        alt="BETC Brother"
+        width={1168}
+        height={446}
         priority
         className="h-16 w-auto object-contain dark:hidden"
       />
       <Image
         src="/logo-dark.png"
-        alt="BTEC Hub"
-        width={958}
-        height={212}
+        alt="BETC Brother"
+        width={1168}
+        height={446}
         priority
         className="hidden h-16 w-auto object-contain dark:block"
       />

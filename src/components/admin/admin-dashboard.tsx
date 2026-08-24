@@ -86,7 +86,7 @@ export function AdminDashboard({
 
   function handleExport() {
     const rows: (string | number | null)[][] = [];
-    rows.push(["كشف الحسابات المالية — BTEC Hub"]);
+    rows.push(["كشف الحسابات المالية — BETC Brother"]);
     rows.push(["تاريخ التصدير", new Date().toLocaleString("ar-EG")]);
     rows.push([]);
     rows.push(["أرصدة الأعضاء"]);

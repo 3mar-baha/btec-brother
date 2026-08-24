@@ -271,17 +271,17 @@ export default function LoginPage() {
       <div ref={logoRef} className="flex flex-col items-center gap-3">
         <Image
           src="/logo-light.png"
-          alt="BTEC Hub"
-          width={958}
-          height={212}
+          alt="BETC Brother"
+          width={1168}
+          height={446}
           priority
           className="h-16 w-auto object-contain dark:hidden"
         />
         <Image
           src="/logo-dark.png"
-          alt="BTEC Hub"
-          width={958}
-          height={212}
+          alt="BETC Brother"
+          width={1168}
+          height={446}
           priority
           className="hidden h-16 w-auto object-contain dark:block"
         />

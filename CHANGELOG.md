@@ -6,6 +6,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com); dates are
 ## [2026-08-24]
 
 ### Changed
+- **Full rebrand to BETC Brother**: platform name updated across metadata, PWA manifest,
+  login/pending screens, Telegram notifications, and the admin export header; brand color
+  shifted from orange-red `#EA2804` to the emblem's crimson `#BB1928` (`--brand`,
+  `--brand-pressed`, `--primary`, browser theme color) across light and dark themes.
 - **Rebranded platform logo** to the new BETC Brother identity: header lockup
   (`logo-light.png` / `logo-dark.png`, shared across light/dark themes) and all app icons
   (`favicon.ico`, `icon-192/512`, `apple-icon`) regenerated from the new artwork with the

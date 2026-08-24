@@ -1,6 +1,6 @@
 <div dir="rtl" align="center">
 
-# BTEC Hub · بِتيك هَب
+# BETC Brother · بيتك براذر
 
 **منصة لإدارة طلبات ومهام BTEC — تربط الوسطاء والعاملين والإدارة في سير عمل واحد.**
 
@@ -28,7 +28,7 @@
 
 ## Overview
 
-**BTEC Hub** is a full-stack platform for managing BTEC assignment orders. Brokers
+**BETC Brother** is a full-stack platform for managing BTEC assignment orders. Brokers
 (`وسيط`) create orders on behalf of clients, workers (`عامل`) claim tasks from the
 open pool and log daily progress, and admins (`مدير`) oversee the whole operation —
 approving new accounts, monitoring activity, and settling payouts.
@@ -214,7 +214,7 @@ Proprietary — all rights reserved. See [LICENSE](LICENSE).
 
 ## نبذة
 
-**بِتيك هَب** منصة متكاملة لإدارة طلبات ومهام BTEC. الوسطاء ينشئون الطلبات نيابةً عن
+**بيتك براذر** منصة متكاملة لإدارة طلبات ومهام BTEC. الوسطاء ينشئون الطلبات نيابةً عن
 العملاء، والعاملون يستلمون المهام من السوق المفتوح ويسجّلون التقدّم اليومي، والمدير
 يشرف على العملية كاملة: اعتماد الحسابات، متابعة النشاط، وتسوية المدفوعات.
 

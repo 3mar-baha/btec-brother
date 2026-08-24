@@ -10,7 +10,7 @@
     --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 13%;
-    --primary: 9 97% 47%;
+    --primary: 354 76% 42%;
     --primary-foreground: 0 0% 100%;
     --secondary: 44 31% 93%;
     --secondary-foreground: 0 0% 13%;
@@ -34,8 +34,8 @@
     --charcoal: 0 0% 34%;
     --ash: 0 0% 39%;
     --ash-light: 0 0% 55%;
-    --brand: 9 97% 47%;
-    --brand-pressed: 10 100% 38%;
+    --brand: 354 76% 42%;
+    --brand-pressed: 354 76% 33%;
     --success: 152 56% 39%;
   }
 
@@ -46,7 +46,7 @@
     --card-foreground: 0 0% 99%;
     --popover: 0 0% 13%;
     --popover-foreground: 0 0% 99%;
-    --primary: 9 97% 47%;
+    --primary: 354 76% 42%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 99%;
@@ -70,8 +70,8 @@
     --charcoal: 0 0% 63%;
     --ash: 0 0% 63%;
     --ash-light: 0 0% 55%;
-    --brand: 9 97% 47%;
-    --brand-pressed: 10 100% 38%;
+    --brand: 354 76% 42%;
+    --brand-pressed: 354 76% 33%;
     --success: 152 56% 39%;
   }
 }

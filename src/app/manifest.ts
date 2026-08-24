@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BTEC Hub",
-    short_name: "BTEC Hub",
+    name: "BETC Brother",
+    short_name: "BETC Brother",
     description: "منصة داخلية لإدارة تكليفات BTEC",
     start_url: "/market",
     display: "standalone",
     background_color: "#f9f7f3",
-    theme_color: "#ea2804",
+    theme_color: "#BB1928",
     lang: "ar",
     dir: "rtl",
     icons: [

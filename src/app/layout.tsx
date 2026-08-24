@@ -20,9 +20,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BTEC Hub",
+  title: "BETC Brother",
   description: "Internal platform for managing BTEC student assignments",
-  applicationName: "BTEC Hub",
+  applicationName: "BETC Brother",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -34,12 +34,12 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "BTEC Hub",
+    title: "BETC Brother",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ea2804",
+  themeColor: "#BB1928",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

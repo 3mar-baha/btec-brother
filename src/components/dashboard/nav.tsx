@@ -103,7 +103,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
         <Link href="/market" className="flex shrink-0 items-center">
           <Image
             src="/logo-light.png"
-            alt="BTEC Hub"
+            alt="BETC Brother"
             width={1168}
             height={446}
             priority
@@ -111,7 +111,7 @@ export function DashboardNav({ user }: { user: NavUser }) {
           />
           <Image
             src="/logo-dark.png"
-            alt="BTEC Hub"
+            alt="BETC Brother"
             width={1168}
             height={446}
             priority
