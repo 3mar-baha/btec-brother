@@ -1,5 +1,5 @@
 /**
- * Database type definitions for BETC Brother.
+ * Database type definitions for BTEC Brother.
  *
  * Mirrors `supabase/schema.sql`. `users` and `orders` follow docs/05-DATA-MODEL.md
  * exactly; the remaining tables were designed to match the ER overview and

@@ -22,7 +22,7 @@ export default async function PendingApprovalPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-canvas px-4 py-10">
       <Image
         src="/logo-light.png"
-        alt="BETC Brother"
+        alt="BTEC Brother"
         width={1168}
         height={446}
         priority
@@ -30,7 +30,7 @@ export default async function PendingApprovalPage() {
       />
       <Image
         src="/logo-dark.png"
-        alt="BETC Brother"
+        alt="BTEC Brother"
         width={1168}
         height={446}
         priority

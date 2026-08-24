@@ -20,16 +20,16 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BETC Brother - نظام إدارة وتشغيل مشاريع BTEC",
+  title: "BTEC Brother - نظام إدارة وتشغيل مشاريع BTEC",
   description:
     "منصة داخلية لإدارة تكليفات ومشاريع BTEC: سوق طلبات مفتوح، CRM للعملاء، توزيع أرباح 80/20، وتنسيق بين الوسطاء والعاملين والإدارة",
-  applicationName: "BETC Brother",
+  applicationName: "BTEC Brother",
   openGraph: {
-    title: "BETC Brother - نظام إدارة وتشغيل مشاريع BTEC",
+    title: "BTEC Brother - Academic Project & Task Operations Platform",
     description:
       "منصة داخلية لإدارة تكليفات ومشاريع BTEC: سوق طلبات مفتوح، CRM للعملاء، وتوزيع أرباح تلقائي",
     type: "website",
-    siteName: "BETC Brother",
+    siteName: "BTEC Brother",
     locale: "ar_AR",
   },
   icons: {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "BETC Brother",
+    title: "BTEC Brother",
   },
 };
 

@@ -271,7 +271,7 @@ export default function LoginPage() {
       <div ref={logoRef} className="flex flex-col items-center gap-3">
         <Image
           src="/logo-light.png"
-          alt="BETC Brother"
+          alt="BTEC Brother"
           width={1168}
           height={446}
           priority
@@ -279,7 +279,7 @@ export default function LoginPage() {
         />
         <Image
           src="/logo-dark.png"
-          alt="BETC Brother"
+          alt="BTEC Brother"
           width={1168}
           height={446}
           priority

@@ -1,6 +1,6 @@
 <div dir="rtl" align="center">
 
-# BETC Brother · بيتك براذر
+# BTEC Brother · بيتك براذر
 
 **منصة لإدارة طلبات ومهام BTEC — تربط الوسطاء والعاملين والإدارة في سير عمل واحد.**
 
@@ -28,7 +28,7 @@
 
 ## Overview
 
-**BETC Brother** is a full-stack platform for managing BTEC assignment orders. Brokers
+**BTEC Brother** is a full-stack platform for managing BTEC assignment orders. Brokers
 (`وسيط`) create orders on behalf of clients, workers (`عامل`) claim tasks from the
 open pool and log daily progress, and admins (`مدير`) oversee the whole operation —
 approving new accounts, monitoring activity, and settling payouts.

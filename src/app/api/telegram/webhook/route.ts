@@ -77,7 +77,7 @@ export async function POST(request: Request) {
   if (linkError || !link) {
     await sendTelegramMessage(
       chatId,
-      "رمز الربط غير صالح أو منتهي الصلاحية. اذهب إلى صفحة الإعدادات في BETC Brother وحاول مجدداً."
+      "رمز الربط غير صالح أو منتهي الصلاحية. اذهب إلى صفحة الإعدادات في BTEC Brother وحاول مجدداً."
     );
     return NextResponse.json({ ok: true });
   }
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
   await service.from("telegram_link_tokens").delete().eq("token", token);
   await sendTelegramMessage(
     chatId,
-    "تم ربط حسابك على BETC Brother بنجاح. ستصلك إشعارات المهام هنا."
+    "تم ربط حسابك على BTEC Brother بنجاح. ستصلك إشعارات المهام هنا."
   );
 
   return NextResponse.json({ ok: true });

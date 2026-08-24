@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to BETC Brother. Keep it small, correct, and tested.
+Thanks for contributing to BTEC Brother. Keep it small, correct, and tested.
 
 ## Setup
 

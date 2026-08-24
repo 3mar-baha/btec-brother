@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BETC Brother",
-    short_name: "BETC Brother",
+    name: "BTEC Brother",
+    short_name: "BTEC Brother",
     description: "منصة داخلية لإدارة تكليفات BTEC",
     start_url: "/market",
     display: "standalone",

@@ -99,7 +99,7 @@ export function UserManagement({ users }: UserManagementProps) {
     toast({ title: "تم اعتماد المستخدم" });
     notifyTelegramUser(
       user.id,
-      `مرحباً ${escapeHtml(user.full_name)}! تم اعتماد حسابك في منصة BETC Brother 🎉`
+      `مرحباً ${escapeHtml(user.full_name)}! تم اعتماد حسابك في منصة BTEC Brother 🎉`
     );
     router.refresh();
   }
