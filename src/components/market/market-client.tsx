@@ -9,6 +9,7 @@ import { useStaggeredEntrance } from "@/hooks/use-motion";
 import { createClient } from "@/lib/supabase/client";
 import { escapeHtml, notifyTelegramUser } from "@/lib/telegram";
 import { CreateOrderModal } from "./create-order-modal";
+import { EditOrderModal } from "./edit-order-modal";
 import { FilterBar } from "./filter-bar";
 import { OrderCard } from "./order-card";
 import type {
@@ -37,6 +38,7 @@ interface MarketClientProps {
   role: Role;
   hasActiveTask: boolean;
   userName: string;
+  currentUserId: string;
 }
 
 export function MarketClient({
@@ -47,6 +49,7 @@ export function MarketClient({
   role,
   hasActiveTask: initialHasActiveTask,
   userName,
+  currentUserId,
 }: MarketClientProps) {
   const { toast } = useToast();
   const [supabase] = useState(() => createClient());
@@ -55,6 +58,7 @@ export function MarketClient({
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [hasActiveTask, setHasActiveTask] = useState(initialHasActiveTask);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<MarketOrder | null>(null);
 
   const loadOrders = useCallback(async () => {
     const { data, error } = await supabase
@@ -225,6 +229,11 @@ export function MarketClient({
               role={role}
               disabled={hasActiveTask}
               claiming={claimingId === order.id}
+              canEdit={
+                order.status === "open" &&
+                (role === "admin" || order.broker_id === currentUserId)
+              }
+              onEdit={setEditTarget}
               onClaim={handleClaim}
             />
           ))}
@@ -239,6 +248,14 @@ export function MarketClient({
         criteriaLevels={criteriaLevels}
         onCreated={loadOrders}
       />
+
+      {editTarget && (
+        <EditOrderModal
+          order={{ id: editTarget.id, order_number: editTarget.order_number }}
+          onOpenChange={(open) => !open && setEditTarget(null)}
+          onUpdated={loadOrders}
+        />
+      )}
     </div>
   );
 }

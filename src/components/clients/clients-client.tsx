@@ -4,12 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Building2,
+  Download,
   GraduationCap,
   MessageCircle,
   ShoppingBag,
   Users,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -22,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CreateOrderModal } from "@/components/market/create-order-modal";
 import { formatMoney, formatDate } from "@/lib/format";
+import { downloadTextFile, toCsv, type CsvCell } from "@/lib/export";
 import { DEFAULT_FILTERS } from "./types";
 import { buildClients, whatsappHref } from "./aggregate";
 import { ClientDrawer } from "./client-drawer";
@@ -180,6 +183,36 @@ export function ClientsClient({
     setQInput("");
   }, [commit]);
 
+  // Export the currently filtered view (what you see is what you export).
+  const handleExport = useCallback(() => {
+    const rows: CsvCell[][] = [
+      [
+        "اسم العميل",
+        "رقم الهاتف",
+        "المدرسة",
+        "الصفوف المعتادة",
+        "عدد الطلبات",
+        "إجمالي القيمة (د.أ)",
+        "الوسيط الأساسي",
+        "آخر طلب",
+      ],
+      ...clients.map((c) => [
+        c.name,
+        c.phone,
+        c.schools.join("، ") || "—",
+        c.gradeIds.map((id) => gradeNameById.get(id)).filter(Boolean).join("، ") || "—",
+        c.totalOrders,
+        c.totalValue,
+        brokerName(c.orders[0].broker_id),
+        formatDate(c.lastOrderAt),
+      ]),
+    ];
+    downloadTextFile(
+      `clients-${new Date().toISOString().slice(0, 10)}.csv`,
+      toCsv(rows)
+    );
+  }, [clients, gradeNameById, brokerName]);
+
   const statCards = [
     { label: "إجمالي العملاء", value: String(stats.totalClients), icon: Users },
     { label: "عدد المدارس المسجلة", value: String(stats.totalSchools), icon: Building2 },
@@ -193,13 +226,24 @@ export function ClientsClient({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
-          العملاء
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          دليل العملاء وسجل تعاملاتهم
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+            العملاء
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            دليل العملاء وسجل تعاملاتهم
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          disabled={clients.length === 0}
+          className="shrink-0 gap-2"
+        >
+          <Download className="h-4 w-4" />
+          تصدير البيانات (CSV / Excel)
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

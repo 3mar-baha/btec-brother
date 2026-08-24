@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, Loader2 } from "lucide-react";
+import { Clock, Loader2, Pencil } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,9 @@ interface OrderCardProps {
   role: Role;
   disabled: boolean;
   claiming: boolean;
+  canEdit?: boolean;
   onClaim: (id: string) => void;
+  onEdit?: (order: MarketOrder) => void;
 }
 
 export function OrderCard({
@@ -36,7 +38,9 @@ export function OrderCard({
   role,
   disabled,
   claiming,
+  canEdit,
   onClaim,
+  onEdit,
 }: OrderCardProps) {
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -64,6 +68,15 @@ export function OrderCard({
           <span className="font-mono text-xs text-ash">
             #{order.order_number}
           </span>
+          {canEdit && onEdit && (
+            <button
+              onClick={() => onEdit(order)}
+              aria-label={`تعديل الطلب #${order.order_number}`}
+              className="rounded-full p-1 text-ash transition-colors hover:bg-bone hover:text-ink"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
         <span
           ref={urgentRef}

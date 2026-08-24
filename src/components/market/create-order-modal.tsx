@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Paperclip, Upload } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Loader2, Paperclip, Upload, UserCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +59,21 @@ const REQUIRED: (keyof FormState)[] = [
   "deadline",
 ];
 
+interface KnownOrder {
+  client_phone: string;
+  client_name: string;
+  client_school: string | null;
+  grade_id: number;
+}
+
+interface ExistingClientInfo {
+  name: string;
+  phone: string;
+  school: string | null;
+  gradeName: string | null;
+  count: number;
+}
+
 interface CreateOrderModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -85,6 +101,8 @@ export function CreateOrderModal({
     ...EMPTY_FORM,
     ...defaultClient,
   }));
+  const [knownOrders, setKnownOrders] = useState<KnownOrder[]>([]);
+  const [existing, setExisting] = useState<ExistingClientInfo | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -93,6 +111,53 @@ export function CreateOrderModal({
   function setField(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
+
+  // Load the broker's recent client orders once per open, for duplicate hints.
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    createClient()
+      .from("orders")
+      .select("client_phone, client_name, client_school, grade_id")
+      .order("created_at", { ascending: false })
+      .limit(500)
+      .then(({ data }) => {
+        if (active) setKnownOrders((data ?? []) as KnownOrder[]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  // Debounced duplicate detection: match on the last 9 phone digits so
+  // 079…, 96279… and +962 79… all resolve to the same client.
+  useEffect(() => {
+    const digits = form.client_phone.replace(/\D/g, "");
+    if (digits.length < 7) {
+      setExisting(null);
+      return;
+    }
+    const suffix = digits.slice(-9);
+    const t = setTimeout(() => {
+      const matches = knownOrders.filter((o) =>
+        o.client_phone.replace(/\D/g, "").endsWith(suffix)
+      );
+      if (matches.length === 0) {
+        setExisting(null);
+        return;
+      }
+      const latest = matches[0];
+      setExisting({
+        name: latest.client_name,
+        phone: latest.client_phone,
+        school: latest.client_school,
+        gradeName:
+          gradeLevels.find((g) => g.id === latest.grade_id)?.name ?? null,
+        count: matches.length,
+      });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [form.client_phone, knownOrders, gradeLevels]);
 
   function applyPreset(preset: BtecPreset) {
     const spec = specialisations.find(
@@ -308,6 +373,25 @@ export function CreateOrderModal({
                 value={form.client_phone}
                 onChange={(e) => setField("client_phone", e.target.value)}
               />
+              {existing && (
+                <div className="mt-2 rounded-lg border border-brand/30 bg-brand/5 p-2.5 text-xs leading-relaxed">
+                  <p className="flex items-center gap-1.5 font-medium text-ink">
+                    <UserCheck className="h-3.5 w-3.5 text-brand" />
+                    هذا العميل مسجل مسبقاً (لديه {existing.count} طلبات سابقة)
+                  </p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {existing.name}
+                    {existing.school ? ` — ${existing.school}` : ""}
+                    {existing.gradeName ? ` — ${existing.gradeName}` : ""}
+                  </p>
+                  <Link
+                    href={`/clients?q=${encodeURIComponent(existing.phone)}`}
+                    className="mt-1 inline-block font-medium text-brand underline"
+                  >
+                    عرض سجله في دليل العملاء
+                  </Link>
+                </div>
+              )}
             </Field>
 
             <Field label="مدرسة العميل">

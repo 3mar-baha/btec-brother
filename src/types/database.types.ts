@@ -176,6 +176,8 @@ export type Database = {
           plagiarism_rate: number | null;
           ai_percentage: number | null;
           revision_notes: string | null;
+          reminder_sent_24h: string | null;
+          reminder_sent_6h: string | null;
           created_at: string;
         };
         Insert: {
@@ -200,6 +202,8 @@ export type Database = {
           plagiarism_rate?: number | null;
           ai_percentage?: number | null;
           revision_notes?: string | null;
+          reminder_sent_24h?: string | null;
+          reminder_sent_6h?: string | null;
           created_at?: string;
         };
         Update: {
@@ -224,6 +228,32 @@ export type Database = {
           plagiarism_rate?: number | null;
           ai_percentage?: number | null;
           revision_notes?: string | null;
+          reminder_sent_24h?: string | null;
+          reminder_sent_6h?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      client_notes: {
+        Row: {
+          id: string;
+          client_phone: string;
+          author_id: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_phone: string;
+          author_id: string;
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_phone?: string;
+          author_id?: string;
+          content?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -473,6 +503,24 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
+      };
+      update_open_order: {
+        Args: {
+          p_order_id: string;
+          p_client_name: string;
+          p_client_phone: string;
+          p_client_school: string;
+          p_title: string;
+          p_unit_title: string;
+          p_assignment_name: string;
+          p_total_price: number;
+          p_deadline: string;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+          order_id: string;
+        } | null;
       };
     };
     Enums: {
