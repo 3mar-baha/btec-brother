@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { SESSION_MAX_AGE } from "@/lib/session";
 
-const PROTECTED = ["/market", "/workspace", "/directory", "/logs", "/admin", "/settings", "/profile"];
+const PROTECTED = ["/market", "/workspace", "/directory", "/clients", "/logs", "/admin", "/settings", "/profile"];
 
 function redirectTo(pathname: string, request: NextRequest) {
   const url = request.nextUrl.clone();

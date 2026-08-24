@@ -65,6 +65,10 @@ interface CreateOrderModalProps {
   gradeLevels: Classification[];
   criteriaLevels: CriteriaLevel[];
   onCreated: () => void;
+  /** Pre-filled client fields (e.g. opening the form from the clients CRM). */
+  defaultClient?: Partial<
+    Pick<FormState, "client_name" | "client_phone" | "client_school">
+  >;
 }
 
 export function CreateOrderModal({
@@ -74,9 +78,13 @@ export function CreateOrderModal({
   gradeLevels,
   criteriaLevels,
   onCreated,
+  defaultClient,
 }: CreateOrderModalProps) {
   const { toast } = useToast();
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>(() => ({
+    ...EMPTY_FORM,
+    ...defaultClient,
+  }));
   const [files, setFiles] = useState<File[]>([]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -99,7 +107,7 @@ export function CreateOrderModal({
   }
 
   function reset() {
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, ...defaultClient });
     setFiles([]);
     setComment("");
     setPresetId("none");

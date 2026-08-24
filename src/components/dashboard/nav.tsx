@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
   Bell,
+  BookUser,
   LayoutDashboard,
   LogOut,
   Settings,
@@ -73,10 +74,20 @@ export function DashboardNav({ user }: { user: NavUser }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Clients CRM is staff-only (admin + broker).
+  const base: NavItem[] =
+    user.role === "worker"
+      ? NAV_ITEMS
+      : [
+          ...NAV_ITEMS.slice(0, 2),
+          { href: "/clients", label: "العملاء", icon: BookUser },
+          ...NAV_ITEMS.slice(2),
+        ];
+
   const items: NavItem[] =
     user.role === "admin"
-      ? [...NAV_ITEMS, { href: "/admin", label: "لوحة الإدارة", icon: ShieldCheck }]
-      : NAV_ITEMS;
+      ? [...base, { href: "/admin", label: "لوحة الإدارة", icon: ShieldCheck }]
+      : base;
 
   async function handleSignOut() {
     const supabase = createClient();

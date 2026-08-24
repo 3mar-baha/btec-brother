@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookUser,
   LayoutDashboard,
   ShieldCheck,
   ShoppingBag,
@@ -29,10 +30,19 @@ const NAV_ITEMS: NavItem[] = [
 export function BottomNav({ role }: { role: string }) {
   const pathname = usePathname();
 
+  const base: NavItem[] =
+    role === "worker"
+      ? NAV_ITEMS
+      : [
+          ...NAV_ITEMS.slice(0, 2),
+          { href: "/clients", label: "العملاء", icon: BookUser },
+          ...NAV_ITEMS.slice(2),
+        ];
+
   const items: NavItem[] =
     role === "admin"
-      ? [...NAV_ITEMS, { href: "/admin", label: "الإدارة", icon: ShieldCheck }]
-      : NAV_ITEMS;
+      ? [...base, { href: "/admin", label: "الإدارة", icon: ShieldCheck }]
+      : base;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur-lg sm:hidden">
