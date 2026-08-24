@@ -23,6 +23,8 @@ import type {
 const ORDER_COLUMNS =
   "id, order_number, broker_id, title, unit_title, assignment_name, specialisation_id, grade_id, criteria_id, total_price, worker_share, deadline, status, created_at";
 
+const PAGE_SIZE = 50;
+
 const DEFAULT_FILTERS: MarketFilters = {
   specialisationId: "all",
   gradeId: "all",
@@ -59,13 +61,37 @@ export function MarketClient({
   const [hasActiveTask, setHasActiveTask] = useState(initialHasActiveTask);
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<MarketOrder | null>(null);
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(initialOrders.length);
 
+  // Server-side filtering + pagination: every market filter maps to a column
+  // predicate, so the DB does the work and pages stay fast as the pool grows.
   const loadOrders = useCallback(async () => {
-    const { data, error } = await supabase
+    let q = supabase
       .from("orders")
-      .select(ORDER_COLUMNS)
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+      .select(ORDER_COLUMNS, { count: "exact" })
+      .eq("status", "open");
+    if (filters.specialisationId !== "all") {
+      q = q.eq("specialisation_id", Number(filters.specialisationId));
+    }
+    if (filters.gradeId !== "all") {
+      q = q.eq("grade_id", Number(filters.gradeId));
+    }
+    if (filters.criteriaId !== "all") {
+      q = q.eq("criteria_id", Number(filters.criteriaId));
+    }
+    if (filters.urgency !== "all") {
+      q = q.gte("deadline", new Date().toISOString());
+      const hours = filters.urgency === "urgent" ? 48 : 24 * 7;
+      q = q.lte(
+        "deadline",
+        new Date(Date.now() + hours * 3_600_000).toISOString()
+      );
+    }
+
+    const { data, count, error } = await q
+      .order("created_at", { ascending: false })
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
     if (error) {
       // Keep the current list on a failed refresh (e.g. transient network
       // issue from the realtime handler) instead of wiping the market.
@@ -76,7 +102,12 @@ export function MarketClient({
       return;
     }
     setOrders(data as MarketOrder[]);
-  }, [supabase, toast]);
+    setTotal(count ?? 0);
+  }, [supabase, filters, page, toast]);
+
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
 
   useEffect(() => {
     const channel = supabase
@@ -110,39 +141,7 @@ export function MarketClient({
     return (id: number) => map.get(id);
   }, [criteriaLevels]);
 
-  const filtered = useMemo(() => {
-    return orders.filter((o) => {
-      if (
-        filters.specialisationId !== "all" &&
-        o.specialisation_id !== Number(filters.specialisationId)
-      ) {
-        return false;
-      }
-      if (
-        filters.gradeId !== "all" &&
-        o.grade_id !== Number(filters.gradeId)
-      ) {
-        return false;
-      }
-      if (
-        filters.criteriaId !== "all" &&
-        o.criteria_id !== Number(filters.criteriaId)
-      ) {
-        return false;
-      }
-      if (filters.urgency !== "all") {
-        const diff = new Date(o.deadline).getTime() - Date.now();
-        if (filters.urgency === "urgent") {
-          if (diff < 0 || diff >= 48 * 3_600_000) return false;
-        } else if (filters.urgency === "week") {
-          if (diff < 0 || diff >= 7 * 86_400_000) return false;
-        }
-      }
-      return true;
-    });
-  }, [orders, filters]);
-
-  async function handleClaim(orderId: string) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));  async function handleClaim(orderId: string) {
     setClaimingId(orderId);
     const { data, error } = await supabase.rpc("claim_order", {
       p_order_id: orderId,
@@ -174,7 +173,7 @@ export function MarketClient({
   }
 
   const isBroker = role === "broker";
-  const gridRef = useStaggeredEntrance<HTMLDivElement>([filtered]);
+  const gridRef = useStaggeredEntrance<HTMLDivElement>([orders]);
 
   return (
     <div className="space-y-6">
@@ -184,7 +183,7 @@ export function MarketClient({
             سوق الطلبات
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} طلب متاح للحجز
+            {total} طلب متاح للحجز
           </p>
         </div>
 
@@ -204,10 +203,13 @@ export function MarketClient({
         specialisations={specialisations}
         gradeLevels={gradeLevels}
         criteriaLevels={criteriaLevels}
-        onChange={setFilters}
+        onChange={(f) => {
+          setFilters(f);
+          setPage(0);
+        }}
       />
 
-      {filtered.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card py-16 text-center">
           <ShoppingBag className="h-8 w-8 text-ash-light" />
           <p className="text-sm text-muted-foreground">
@@ -215,11 +217,12 @@ export function MarketClient({
           </p>
         </div>
       ) : (
+        <>
         <div
           ref={gridRef}
           className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
         >
-          {filtered.map((order) => (
+          {orders.map((order) => (
             <OrderCard
               key={order.id}
               order={order}
@@ -238,6 +241,33 @@ export function MarketClient({
             />
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+            <p className="text-xs text-muted-foreground">
+              صفحة {page + 1} من {totalPages} — {total} طلب
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+              >
+                السابق
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage(page + 1)}
+              >
+                التالي
+              </Button>
+            </div>
+          </div>
+        )}
+        </>
       )}
 
       <CreateOrderModal

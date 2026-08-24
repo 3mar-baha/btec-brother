@@ -43,6 +43,8 @@ import type {
 
 const FILTER_KEYS = ["q", "grade", "criteria", "school", "spec", "broker", "activity", "sort"] as const;
 
+const PAGE_SIZE = 25;
+
 interface ClientsClientProps {
   initialOrders: ClientOrder[];
   specialisations: Classification[];
@@ -207,6 +209,15 @@ export function ClientsClient({
     ? clients.find((c) => c.key === selectedKey) ?? null
     : null;
 
+  // Client-side pagination over the aggregated (filtered) directory.
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+  const totalPages = Math.max(1, Math.ceil(clients.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = clients.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   const [createFor, setCreateFor] = useState<ClientAggregate | null>(null);
 
   const resetFilters = useCallback(() => {
@@ -340,7 +351,7 @@ export function ClientsClient({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map((c) => (
+                {paged.map((c) => (
                   <TableRow
                     key={c.key}
                     onClick={() => setSelectedKey(c.key)}
@@ -387,7 +398,7 @@ export function ClientsClient({
 
           {/* Mobile cards */}
           <div className="grid grid-cols-1 gap-3 md:hidden">
-            {clients.map((c) => (
+            {paged.map((c) => (
               <button
                 key={c.key}
                 onClick={() => setSelectedKey(c.key)}
@@ -433,6 +444,32 @@ export function ClientsClient({
               </button>
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+              <p className="text-xs text-muted-foreground">
+                صفحة {safePage} من {totalPages} — {clients.length} عميل
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage <= 1}
+                  onClick={() => setPage(safePage - 1)}
+                >
+                  السابق
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage >= totalPages}
+                  onClick={() => setPage(safePage + 1)}
+                >
+                  التالي
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
 

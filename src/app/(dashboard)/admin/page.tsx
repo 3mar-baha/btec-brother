@@ -6,6 +6,8 @@ import type {
   FinancialSummary,
   LedgerRow,
   ManagedUser,
+  ReportData,
+  StaffPerformance,
   StuckOrder,
   TransactionRow,
 } from "@/components/admin/types";
@@ -23,6 +25,9 @@ interface CompletedOrder {
   worker_id: string | null;
   broker_id: string;
   total_price: number;
+  specialisation_id: number;
+  created_at: string;
+  completed_at: string | null;
 }
 
 interface PayoutRow {
@@ -88,7 +93,9 @@ export default async function AdminPage({
       .order("full_name"),
     supabase
       .from("orders")
-      .select("id, order_number, worker_id, broker_id, total_price")
+      .select(
+        "id, order_number, worker_id, broker_id, total_price, specialisation_id, created_at, completed_at"
+      )
       .eq("status", "completed"),
     supabase
       .from("payouts")
@@ -121,6 +128,89 @@ export default async function AdminPage({
     settledPayouts: payouts
       .filter((p) => p.status === "settled")
       .reduce((s, p) => s + Number(p.amount), 0),
+  };
+
+  // ---- Reports aggregation (completed orders) ------------------------------
+  const monthFmt = new Intl.DateTimeFormat("ar", { month: "short" });
+  const monthlyMap = new Map<string, { revenue: number; count: number }>();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i, 1);
+    monthlyMap.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, {
+      revenue: 0,
+      count: 0,
+    });
+  }
+  const specMap = new Map<number, { revenue: number; count: number }>();
+  const staffMap = new Map<
+    string,
+    { revenue: number; completed: number; days: number }
+  >();
+  for (const o of completed) {
+    if (o.completed_at) {
+      const key = o.completed_at.slice(0, 7);
+      const m = monthlyMap.get(key);
+      if (m) {
+        m.revenue += Number(o.total_price);
+        m.count += 1;
+      }
+      const days = Math.max(
+        0,
+        (new Date(o.completed_at).getTime() - new Date(o.created_at).getTime()) /
+          86_400_000
+      );
+      for (const id of [o.broker_id, o.worker_id]) {
+        if (!id) continue;
+        const s = staffMap.get(id) ?? { revenue: 0, completed: 0, days: 0 };
+        s.revenue += Number(o.total_price);
+        s.completed += 1;
+        s.days += days;
+        staffMap.set(id, s);
+      }
+    }
+    const sp = specMap.get(o.specialisation_id) ?? { revenue: 0, count: 0 };
+    sp.revenue += Number(o.total_price);
+    sp.count += 1;
+    specMap.set(o.specialisation_id, sp);
+  }
+
+  const staffRow = (id: string): StaffPerformance => {
+    const s = staffMap.get(id)!;
+    const name = users.find((u) => u.id === id)?.full_name ?? "—";
+    return {
+      id,
+      name,
+      revenue: s.revenue,
+      completed: s.completed,
+      avgDays: s.completed > 0 ? s.days / s.completed : 0,
+    };
+  };
+
+  const specNameById = new Map(
+    ((specsRes.data ?? []) as Category[]).map((c) => [c.id, c.name])
+  );
+
+  const reports: ReportData = {
+    monthly: Array.from(monthlyMap.entries()).map(([key, v]) => ({
+      label: monthFmt.format(new Date(`${key}-15`)),
+      revenue: v.revenue,
+      count: v.count,
+    })),
+    bySpecialisation: Array.from(specMap.entries())
+      .map(([id, v]) => ({
+        name: specNameById.get(id) ?? "—",
+        revenue: v.revenue,
+        count: v.count,
+      }))
+      .sort((a, b) => b.revenue - a.revenue),
+    perBroker: Array.from(staffMap.entries())
+      .filter(([id]) => users.find((u) => u.id === id)?.role === "broker")
+      .map(([id]) => staffRow(id))
+      .sort((a, b) => b.revenue - a.revenue),
+    perWorker: Array.from(staffMap.entries())
+      .filter(([id]) => users.find((u) => u.id === id)?.role === "worker")
+      .map(([id]) => staffRow(id))
+      .sort((a, b) => b.revenue - a.revenue),
   };
 
   const ledger: LedgerRow[] = users
@@ -206,6 +296,7 @@ export default async function AdminPage({
         gradeLevels={(gradesRes.data ?? []) as Category[]}
         criteriaLevels={(criteriaRes.data ?? []) as Category[]}
         stuckOrders={stuckOrders}
+        reports={reports}
         initialTab={initialTab}
       />
     </div>

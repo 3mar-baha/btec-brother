@@ -55,3 +55,30 @@ export interface ManagedUser {
   requested_role: string;
   created_at: string;
 }
+
+export interface MonthlyPoint {
+  label: string;
+  revenue: number;
+  count: number;
+}
+
+export interface DistributionRow {
+  name: string;
+  revenue: number;
+  count: number;
+}
+
+export interface StaffPerformance {
+  id: string;
+  name: string;
+  revenue: number;
+  completed: number;
+  avgDays: number;
+}
+
+export interface ReportData {
+  monthly: MonthlyPoint[];
+  bySpecialisation: DistributionRow[];
+  perBroker: StaffPerformance[];
+  perWorker: StaffPerformance[];
+}

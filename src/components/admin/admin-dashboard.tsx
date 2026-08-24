@@ -11,6 +11,7 @@ import { downloadTextFile, toCsv } from "@/lib/export";
 import { createClient } from "@/lib/supabase/client";
 import { CategoriesManager } from "./categories-manager";
 import { EmergencyControl } from "./emergency-control";
+import { ReportsPanel } from "./reports-panel";
 import { FinancialCards } from "./financial-cards";
 import { MemberLedger } from "./member-ledger";
 import { SettleModal } from "./settle-modal";
@@ -20,6 +21,7 @@ import type {
   FinancialSummary,
   LedgerRow,
   ManagedUser,
+  ReportData,
   StuckOrder,
   TransactionRow,
 } from "./types";
@@ -39,6 +41,7 @@ interface AdminDashboardProps {
   gradeLevels: Category[];
   criteriaLevels: Category[];
   stuckOrders: StuckOrder[];
+  reports: ReportData;
   initialTab: string;
 }
 
@@ -51,6 +54,7 @@ export function AdminDashboard({
   gradeLevels,
   criteriaLevels,
   stuckOrders,
+  reports,
   initialTab,
 }: AdminDashboardProps) {
   const { toast } = useToast();
@@ -155,6 +159,12 @@ export function AdminDashboard({
           التصنيفات
         </TabsTrigger>
         <TabsTrigger
+          value="reports"
+          className="rounded-full px-4 py-1.5 data-[state=active]:bg-ink data-[state=active]:text-background"
+        >
+          التقارير
+        </TabsTrigger>
+        <TabsTrigger
           value="control"
           className="rounded-full px-4 py-1.5 data-[state=active]:bg-ink data-[state=active]:text-background"
         >
@@ -183,6 +193,10 @@ export function AdminDashboard({
           gradeLevels={gradeLevels}
           criteriaLevels={criteriaLevels}
         />
+      </TabsContent>
+
+      <TabsContent value="reports">
+        <ReportsPanel reports={reports} />
       </TabsContent>
 
       <TabsContent value="control">
