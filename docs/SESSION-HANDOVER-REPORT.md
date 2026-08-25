@@ -1,6 +1,6 @@
 # Session Handover Report — BTEC Brother
 
-**Generated:** 2026-08-24
+**Generated:** 2026-08-25
 **Branch:** `main` @ `3mar-baha/betc-brother`
 **Prepared for:** the next working session
 
@@ -9,17 +9,19 @@
 ## 1. Executive Summary
 
 The platform is **production-live and feature-complete** for its current
-scope. This session delivered the full rebrand to **BTEC Brother** (crimson
-`#BB1928` identity, new logo assets, strict spelling across code/metadata/
-Telegram/docs), a **CRM operations suite** (deadline reminder cron,
-duplicate-client detection, CSV export, guarded open-order editing, realtime
-client sync, client notes, revenue reports, server-side pagination), a
-**purged git history** (zero AI attribution across all refs), and a complete
-**English documentation suite** with a private owner manual.
+scope. The full rebrand to **BTEC Brother**, the **CRM operations suite**
+(deadline reminder cron, duplicate-client detection, CSV export, guarded
+open-order editing, realtime client sync, client notes, revenue reports,
+server-side pagination), and the **git-history attribution purge** were all
+delivered in prior sessions. The 2026-08-25 session closed the last gap:
+a **residual brand sweep** that removed the remaining `BETC` / `BTEC Hub`
+strings the previous handover had incorrectly reported as fully purged.
 
-**Production build:** green — `lint` 0 errors, `tsc --noEmit` 0 errors,
-`next build` 22 routes, unit tests 5/5, Playwright **24/24** against staging,
-GitHub Actions CI **success**.
+**Production build:** green — re-verified 2026-08-25: `lint` 0 errors,
+`tsc --noEmit` 0 errors, unit tests 5/5, `next build` all routes clean.
+Playwright e2e last ran 24/24 against staging on 2026-08-24 (skipped on
+2026-08-25: the diff touched only SQL comment headers, LICENSE text,
+package name metadata — no runtime code path).
 
 ## 2. Rebranding Verification (BTEC Brother — strict spelling)
 
@@ -31,27 +33,38 @@ GitHub Actions CI **success**.
 | Login + pending-approval screens | `src/app/(auth)/login`, `src/app/pending-approval` | ✅ |
 | Telegram approval/link/webhook templates | `user-management.tsx`, `telegram/webhook/route.ts` | ✅ |
 | Admin export header | `admin-dashboard.tsx` | ✅ |
-| `package.json` (`"name": "btec-brother"`) + repo URLs | `package.json`, README, CONTRIBUTING, issue templates | ✅ |
+| `package.json` (`"name": "btec-brother"`) + lockfile | fixed 2026-08-25 (was `betc-brother`) | ✅ |
+| LICENSE + SECURITY.md product name | fixed 2026-08-25 (was `BTEC Hub`) | ✅ |
+| SQL headers: schema/setup/seed + 11 migrations | fixed 2026-08-25 (were `BTEC Hub`) | ✅ |
 | Brand color tokens (light + dark) | `src/app/globals.css` | ✅ |
 | Docs suite + CHANGELOG + CLAUDE.md | `docs/`, root | ✅ |
 
-Sweep result: `grep -r "BETC"` over source/docs/config → **0 matches**.
-Note: the logo artwork itself still reads "BETC BROTHER" (JPEG asset) —
-replace `public/logo-*.png` if strict BTEC spelling is wanted inside the
-image too.
+Sweep result (2026-08-25): `grep -rniE "BETC|BTEC Hub"` over the repo →
+the only remaining matches are (a) factual notes that the logo JPEG artwork
+itself spells "BETC BROTHER" (`docs/10-CHECKPOINT.md`), and (b) URLs using
+the real GitHub slug `3mar-baha/betc-brother`. No misspelled brand strings
+remain in code, SQL, docs prose, or config.
+
+> ⚠️ Correction to the previous handover: its claim of "`grep -r "BETC"`
+> → 0 matches" was inaccurate — `crm_features.sql`, `LICENSE`,
+> `SECURITY.md`, 11 migration headers, and the package name still carried
+> old-brand strings at that time. All fixed as of `ce42275`.
 
 ## 3. Attribution Purge Status
 
-- Command executed: `git filter-branch -f --msg-filter 'sed -E "/^[Cc]o-[Aa]uthored-[Bb]y:.*([Cc]laude|anthropic)/d"' -- --all`
-  (the brief's original pattern missed the capitalized `Co-Authored-By:`
-  casing actually used; the executed pattern is intent-identical).
-- Backup refs (`refs/original/*`) and reflogs deleted; `git gc --prune=now`.
-- Verification: `git log --all --format=%b | grep -ci co-authored` → **0**.
-  Remote (`origin/main`) verified **0** after force-push.
-- Authors, committers, timestamps, and file trees preserved (message-filter
-  only). Author of record: `Madaar Team`.
-- Permanent policy added in [`CLAUDE.md`](../CLAUDE.md): **never** append any
-  AI attribution trailer to commits.
+- History was rewritten in a prior session via
+  `git filter-branch --msg-filter` removing every
+  `Co-authored-by: Claude*` / anthropic line; backup refs and reflogs
+  pruned; force-pushed to `origin/main`.
+- Re-verified 2026-08-25: `git log --all --format=%B | grep -iE
+  "co-authored-by|anthropic"` → **0 attribution lines** (only legitimate
+  mentions of the `CLAUDE.md` filename in one commit subject/body).
+- Authors, committers, timestamps, and file trees preserved. Author of
+  record: `Madaar Team`.
+- Permanent policy in [`CLAUDE.md`](../CLAUDE.md): **never** append any AI
+  attribution trailer to commits.
+- 2026-08-25 session performed **no history rewrite and no force-push** —
+  none needed; new work lands as normal commits.
 
 ## 4. Documentation Registry
 
@@ -74,44 +87,40 @@ image too.
 | `AUDIT-REPORT-2026-08-24.md` / `REMAINING-ITEMS-2026-08-24.md` | Historical security audit records |
 
 Legacy `.docx` specs and `docs/ai/` were removed from the repo (originals
-preserved in the local `BETC Brother - Documentation` folder).
+preserved locally).
 
 ## 5. Latest Commit Hashes (pushed to `origin/main`)
 
 | Hash | Subject |
 | ---- | ------- |
-| *(this commit)* | docs: session handover report |
+| *(handover commit)* | docs: regenerate session handover report + checkpoint for residual brand sweep |
+| `ce42275` | chore(brand): purge residual BETC/BTEC Hub strings from sql headers, license, package name |
+| `91cbc9c` | docs: session handover report for the next session |
 | `a89a94f` | docs: full English documentation suite + private owner manual |
 | `28c4d57` | chore(brand): enforce BTEC spelling platform-wide, add CLAUDE.md attribution policy *(first post-rewrite hash)* |
-| `5185bd1`* | pre-rewrite: changelog for CRM feature suite *(hash valid in pre-rewrite history only)* |
-
-Recent feature commits (post-rewrite lineage, same trees/messages minus
-attribution): `e5d7504` rebrand+reminders+dedupe+CSV+edit · `da9027e`
-realtime+notes · `4e0ecf0` reports+pagination · `feae817` e2e flows ·
-`b3ab8c8`/`4149169` CI fixes · `012109e` repo rename refs · `a0806bf`
-logo · `9a10117` crimson rebrand · `bd1212c` clients CRM.
 
 Live deployments: Vercel auto-deploys `main`. App URL currently
 `https://btec-hub.vercel.app` until the Vercel project is renamed.
 
 ## 6. Next Session Quick-Start
 
-**Immediate (owner, ~10 min):**
+**Immediate (owner actions, ~15 min):**
 1. Apply `supabase/migrations/crm_features.sql` to the **staging** SQL
    Editor (production already applied), then `notify pgrst, 'reload schema';`.
 2. In Vercel: confirm `CRON_SECRET` + set `NEXT_PUBLIC_APP_URL`; rename the
    project to `btec-brother` if the domain matters.
-3. Verify cron: `curl -i https://<domain>/api/cron/reminders` → 401; with
+3. Rename the GitHub repo `betc-brother` → `btec-brother` (Settings →
+   General; GitHub auto-redirects old URLs), then update the ~8 files
+   referencing the old slug — see `docs/10-CHECKPOINT.md` open item #5.
+4. Verify cron: `curl -i https://<domain>/api/cron/reminders` → 401; with
    bearer → `{"ok":true,...}`.
 
 **Then (dev session):**
 1. Run the full suite: `npm run test:e2e` — then add notes/edit-order E2E
-   coverage (now unblocked by the staging migration; follow
+   coverage (unblocked by the staging migration; follow
    `tests/e2e/revisions.spec.ts` patterns).
 2. Phase 6 roadmap in `docs/07-IMPLEMENTATION-PLAN.md`: client merge tool,
    configurable country code, payout reversal, overdue digest.
-3. Optional cleanup: rename local folders via the plan discussed earlier
-   (session lock prevents it while Claude is running).
 
 **Commands:**
 ```bash

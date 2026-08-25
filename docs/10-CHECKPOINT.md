@@ -1,7 +1,7 @@
 # 10 — Checkpoint (Live State)
 
-**Milestone:** BTEC Brother rebrand + CRM Operations Suite
-**Date:** 2026-08-24
+**Milestone:** BTEC Brother rebrand + CRM Operations Suite + residual brand sweep
+**Date:** 2026-08-25
 **Production:** Vercel (`fra1`), auto-deploys from `main`
 **Database:** `supabase/migrations/crm_features.sql` applied to production
 (staging: apply before running notes/edit E2E)
@@ -50,7 +50,8 @@
 
 ## 🧪 Quality Gates (all green at this checkpoint)
 `npm run lint` · `npx tsc --noEmit` · `npm run build` (22 routes) ·
-`node --test "tests/unit/*.test.ts"` (5) · Playwright 24/24 on staging ·
+`node --test "tests/unit/*.test.ts"` (5) — re-verified 2026-08-25 ·
+Playwright 24/24 on staging (last full run 2026-08-24) ·
 GitHub Actions CI green.
 
 ## 📌 Known Open Items
@@ -63,3 +64,9 @@ GitHub Actions CI green.
 4. Logo artwork spells "BETC BROTHER" while platform text uses "BTEC
    Brother" — replace the artwork file if strict BTEC spelling is wanted in
    the logo itself.
+5. GitHub repository slug is still `3mar-baha/betc-brother`; all clone/CI/
+   badge URLs intentionally match it. Owner action: rename to `btec-brother`
+   in GitHub Settings → then update the ~8 files referencing the old slug
+   (`package.json`, `README.md`, `CONTRIBUTING.md`, `.env.example`,
+   `.github/ISSUE_TEMPLATE/config.yml`, `docs/13-DEPLOYMENT.md`,
+   `docs/10-CHECKPOINT.md`).
