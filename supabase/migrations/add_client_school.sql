@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Migration: client school name on orders
+-- BTEC Brother — Migration: client school name on orders
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Adds an optional
 -- `client_school` column to `public.orders` so brokers can record the

@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Migration: Telegram bot deep-link linking
+-- BTEC Brother — Migration: Telegram bot deep-link linking
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Enables "link your Telegram
 -- account" via the bot (t.me/btechub_team_bot?start=<token>) instead of the

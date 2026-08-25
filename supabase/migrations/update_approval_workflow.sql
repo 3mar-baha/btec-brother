@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Incremental Migration: Approval Workflow
+-- BTEC Brother — Incremental Migration: Approval Workflow
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Adds the sign-up approval
 -- workflow on top of an existing database without wiping data:

@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Incremental Migration: Telegram Auth & Notifications
+-- BTEC Brother — Incremental Migration: Telegram Auth & Notifications
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Adds Telegram identity columns
 -- to `public.users`, updates `handle_new_user` to capture them from auth

@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Database Schema & Policies
+-- BTEC Brother — Database Schema & Policies
 -- ----------------------------------------------------------------------------
 -- `users` and `orders` follow docs/05-DATA-MODEL.md exactly. The remaining
 -- tables (specialisations, grade_levels, criteria_levels, order_attachments,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Migration: exclude admin from directory_stats()
+-- BTEC Brother — Migration: exclude admin from directory_stats()
 -- ----------------------------------------------------------------------------
 -- The team directory (دليل الفريق) should show only workers and brokers with
 -- their completion/earnings metrics. Admins don't take tasks or earn money, so

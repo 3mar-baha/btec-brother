@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Fix: sequence grants for order creation
+-- BTEC Brother — Fix: sequence grants for order creation
 -- ----------------------------------------------------------------------------
 -- Symptom: creating an order fails with
 --   "permission denied for sequence orders_order_number_seq"

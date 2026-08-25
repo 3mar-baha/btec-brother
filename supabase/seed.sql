@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Seed Data
+-- BTEC Brother — Seed Data
 -- ----------------------------------------------------------------------------
 -- Run AFTER schema.sql on a fresh database. The script is idempotent.
 --

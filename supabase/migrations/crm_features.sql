@@ -1,5 +1,5 @@
 -- ============================================================================
--- BETC Brother — Migration: CRM feature suite
+-- BTEC Brother — Migration: CRM feature suite
 -- ----------------------------------------------------------------------------
 -- Run manually in the Supabase SQL Editor (staging first, then production).
 -- Adds:

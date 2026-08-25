@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Migration: directory_stats() RPC
+-- BTEC Brother — Migration: directory_stats() RPC
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Creates the aggregated
 -- team-stats function used by the /directory page. Idempotent (create or

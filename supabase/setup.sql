@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — CONSOLIDATED SETUP (fresh database)
+-- BTEC Brother — CONSOLIDATED SETUP (fresh database)
 -- ----------------------------------------------------------------------------
 -- Run this single file in the Supabase SQL editor for a brand-new project.
 -- It applies, in order:
@@ -15,7 +15,7 @@
 -- 1. schema.sql
 -- ============================================================================
 -- ============================================================================
--- BTEC Hub — Database Schema & Policies
+-- BTEC Brother — Database Schema & Policies
 -- ----------------------------------------------------------------------------
 -- `users` and `orders` follow docs/05-DATA-MODEL.md exactly. The remaining
 -- tables (specialisations, grade_levels, criteria_levels, order_attachments,
@@ -993,7 +993,7 @@ grant execute on function public.reject_user(uuid) to authenticated, service_rol
 -- 2. add_telegram_auth.sql
 -- ============================================================================
 -- ============================================================================
--- BTEC Hub — Incremental Migration: Telegram Auth & Notifications
+-- BTEC Brother — Incremental Migration: Telegram Auth & Notifications
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Adds Telegram identity columns
 -- to `public.users`, updates `handle_new_user` to capture them from auth
@@ -1098,7 +1098,7 @@ for each row execute function public.enforce_user_field_protection();
 -- 3. telegram_bot_linking.sql
 -- ============================================================================
 -- ============================================================================
--- BTEC Hub — Migration: Telegram bot deep-link linking
+-- BTEC Brother — Migration: Telegram bot deep-link linking
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Enables "link your Telegram
 -- account" via the bot (t.me/btechub_team_bot?start=<token>) instead of the
@@ -1137,7 +1137,7 @@ grant all on public.telegram_link_tokens to service_role;
 -- 4. grant_service_role_and_promote_admin.sql
 -- ============================================================================
 -- ============================================================================
--- BTEC Hub — Migration: service_role grants + admin promotion
+-- BTEC Brother — Migration: service_role grants + admin promotion
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Fixes two things:
 --
@@ -1248,7 +1248,7 @@ for each row execute function public.handle_new_user();
 -- 5. seed.sql
 -- ============================================================================
 -- ============================================================================
--- BTEC Hub — Seed Data
+-- BTEC Brother — Seed Data
 -- ----------------------------------------------------------------------------
 -- Run AFTER schema.sql on a fresh database. The script is idempotent.
 --

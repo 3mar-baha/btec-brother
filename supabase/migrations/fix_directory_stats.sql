@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Fix: directory_stats() metric inflation
+-- BTEC Brother — Fix: directory_stats() metric inflation
 -- ----------------------------------------------------------------------------
 -- The old `members` query joined completed orders, active orders AND payouts
 -- in one FROM, producing a cross-product when a member had several completed

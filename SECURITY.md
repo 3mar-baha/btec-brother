@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in BTEC Hub, please report it
+If you discover a security vulnerability in BTEC Brother, please report it
 responsibly. Do **not** open a public issue.
 
 Email the maintainer directly with a description of the issue, steps to

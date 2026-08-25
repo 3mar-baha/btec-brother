@@ -1,5 +1,5 @@
 -- ============================================================================
--- BTEC Hub — Migration: service_role grants + admin promotion
+-- BTEC Brother — Migration: service_role grants + admin promotion
 -- ----------------------------------------------------------------------------
 -- Run directly in the live Supabase SQL editor. Fixes two things:
 --
