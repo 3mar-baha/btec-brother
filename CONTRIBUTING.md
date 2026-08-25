@@ -5,8 +5,8 @@ Thanks for contributing to BTEC Brother. Keep it small, correct, and tested.
 ## Setup
 
 ```bash
-git clone https://github.com/3mar-baha/betc-brother.git
-cd betc-brother
+git clone https://github.com/3mar-baha/btec-brother.git
+cd btec-brother
 npm install
 cp .env.example .env.local   # fill in your Supabase + Telegram values
 npm run dev

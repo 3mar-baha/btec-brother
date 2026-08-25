@@ -44,7 +44,7 @@
 
 ## 🎨 Brand
 - Name: **BTEC Brother** (strict spelling) — metadata, PWA manifest,
-  Telegram templates, docs, repo (`3mar-baha/betc-brother`).
+  Telegram templates, docs, repo (`3mar-baha/btec-brother`).
 - Color: crimson `#BB1928` (`--brand`), pressed `#971420`; theme-color
   browser + PWA. Logo: BETC BROTHER artwork (JPEG-derived, transparent).
 
@@ -64,9 +64,3 @@ GitHub Actions CI green.
 4. Logo artwork spells "BETC BROTHER" while platform text uses "BTEC
    Brother" — replace the artwork file if strict BTEC spelling is wanted in
    the logo itself.
-5. GitHub repository slug is still `3mar-baha/betc-brother`; all clone/CI/
-   badge URLs intentionally match it. Owner action: rename to `btec-brother`
-   in GitHub Settings → then update the ~8 files referencing the old slug
-   (`package.json`, `README.md`, `CONTRIBUTING.md`, `.env.example`,
-   `.github/ISSUE_TEMPLATE/config.yml`, `docs/13-DEPLOYMENT.md`,
-   `docs/10-CHECKPOINT.md`).

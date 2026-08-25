@@ -1,7 +1,7 @@
 # Session Handover Report — BTEC Brother
 
 **Generated:** 2026-08-25
-**Branch:** `main` @ `3mar-baha/betc-brother`
+**Branch:** `main` @ `3mar-baha/btec-brother`
 **Prepared for:** the next working session
 
 ---
@@ -33,7 +33,7 @@ package name metadata — no runtime code path).
 | Login + pending-approval screens | `src/app/(auth)/login`, `src/app/pending-approval` | ✅ |
 | Telegram approval/link/webhook templates | `user-management.tsx`, `telegram/webhook/route.ts` | ✅ |
 | Admin export header | `admin-dashboard.tsx` | ✅ |
-| `package.json` (`"name": "btec-brother"`) + lockfile | fixed 2026-08-25 (was `betc-brother`) | ✅ |
+| `package.json` (`"name": "btec-brother"`) + lockfile | fixed 2026-08-25 (was misspelled) | ✅ |
 | LICENSE + SECURITY.md product name | fixed 2026-08-25 (was `BTEC Hub`) | ✅ |
 | SQL headers: schema/setup/seed + 11 migrations | fixed 2026-08-25 (were `BTEC Hub`) | ✅ |
 | Brand color tokens (light + dark) | `src/app/globals.css` | ✅ |
@@ -42,7 +42,7 @@ package name metadata — no runtime code path).
 Sweep result (2026-08-25): `grep -rniE "BETC|BTEC Hub"` over the repo →
 the only remaining matches are (a) factual notes that the logo JPEG artwork
 itself spells "BETC BROTHER" (`docs/10-CHECKPOINT.md`), and (b) URLs using
-the real GitHub slug `3mar-baha/betc-brother`. No misspelled brand strings
+the real GitHub slug `3mar-baha/btec-brother`. No misspelled brand strings
 remain in code, SQL, docs prose, or config.
 
 > ⚠️ Correction to the previous handover: its claim of "`grep -r "BETC"`
@@ -109,9 +109,8 @@ Live deployments: Vercel auto-deploys `main`. App URL currently
    Editor (production already applied), then `notify pgrst, 'reload schema';`.
 2. In Vercel: confirm `CRON_SECRET` + set `NEXT_PUBLIC_APP_URL`; rename the
    project to `btec-brother` if the domain matters.
-3. Rename the GitHub repo `betc-brother` → `btec-brother` (Settings →
-   General; GitHub auto-redirects old URLs), then update the ~8 files
-   referencing the old slug — see `docs/10-CHECKPOINT.md` open item #5.
+3. ~~Rename the GitHub repo to `btec-brother`~~ **done 2026-08-25** — repo
+   slug and all local clone/CI/badge URLs now use `btec-brother`.
 4. Verify cron: `curl -i https://<domain>/api/cron/reminders` → 401; with
    bearer → `{"ok":true,...}`.
 

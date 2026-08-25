@@ -8,7 +8,7 @@
 | Database/Auth/Realtime/Storage | Supabase (production project) | manual SQL migrations |
 | Staging Supabase | separate project (ref in `.env.staging`) | E2E target only |
 | Cron | Vercel Cron → `GET /api/cron/reminders`, hourly (`35 * * * *`) | `CRON_SECRET` bearer |
-| Repo | `github.com/3mar-baha/betc-brother` | CI: lint + typecheck + unit |
+| Repo | `github.com/3mar-baha/btec-brother` | CI: lint + typecheck + unit |
 
 ## 2. Environment Variables (Vercel project settings)
 

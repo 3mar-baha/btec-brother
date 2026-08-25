@@ -5,7 +5,7 @@
 **Academic Project & Task Operations Platform**
 نظام إدارة وتشغيل مشاريع BTEC
 
-[![CI](https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml/badge.svg)](https://github.com/3mar-baha/betc-brother/actions/workflows/ci.yml)
+[![CI](https://github.com/3mar-baha/btec-brother/actions/workflows/ci.yml/badge.svg)](https://github.com/3mar-baha/btec-brother/actions/workflows/ci.yml)
 
 </div>
 
@@ -39,8 +39,8 @@ Telegram Bot notifications · Vercel Cron · Playwright + Node test runner.
 ## Quick Start
 
 ```bash
-git clone https://github.com/3mar-baha/betc-brother.git
-cd betc-brother
+git clone https://github.com/3mar-baha/btec-brother.git
+cd btec-brother
 npm install
 cp .env.example .env.local   # fill in Supabase + Telegram values
 npm run dev                  # http://localhost:3000

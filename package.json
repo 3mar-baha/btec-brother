@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/3mar-baha/betc-brother.git"
+    "url": "https://github.com/3mar-baha/btec-brother.git"
   },
   "engines": {
     "node": ">=18.17.0"
